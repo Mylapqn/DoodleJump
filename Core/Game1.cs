@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using DoodleJump.Hierarchy;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
@@ -8,6 +9,7 @@ namespace DoodleJump.Core
     {
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
+        public Assets Assets;
 
         public Game1()
         {
@@ -16,7 +18,9 @@ namespace DoodleJump.Core
 			_graphics.PreferredBackBufferHeight = GameSettings.WindowHeight;
 			_graphics.ApplyChanges();
 
-            Content.RootDirectory = "Content";
+            Assets = new Assets(this);
+
+			Content.RootDirectory = "Content";
             IsMouseVisible = true;
 		}
 
@@ -30,9 +34,9 @@ namespace DoodleJump.Core
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
-
-            // TODO: use this.Content to load your game content here
-        }
+			// TODO: use this.Content to load your game content here
+            Assets.LoadAllAssets();
+		}
 
         protected override void Update(GameTime gameTime)
         {
