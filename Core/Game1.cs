@@ -1,4 +1,5 @@
 ﻿using DoodleJump.Hierarchy;
+using DoodleJump.Objects;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -10,8 +11,9 @@ namespace DoodleJump.Core
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
         public Assets Assets;
+        public static Game1 Instance;
 
-        public Game1()
+		public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
 			_graphics.PreferredBackBufferWidth = GameSettings.WindowWidth;
@@ -22,6 +24,8 @@ namespace DoodleJump.Core
 
 			Content.RootDirectory = "Content";
             IsMouseVisible = true;
+
+            Instance = this;
 		}
 
         protected override void Initialize()
@@ -29,6 +33,7 @@ namespace DoodleJump.Core
             // TODO: Add your initialization logic here
 
             base.Initialize();
+            FireSprite fire = new FireSprite();
         }
 
         protected override void LoadContent()
