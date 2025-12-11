@@ -19,6 +19,8 @@ namespace DoodleJump.Rendering
 		public bool IsAnimationStopped { get; set; }
 
 		int frameCounter = 0;
+		float frameFloat = 0;
+		public float AnimationFPS { get; set; } = -12f;
 
 		public SpriteSheetAnimation(
 			Texture2D texture,
@@ -38,7 +40,6 @@ namespace DoodleJump.Rendering
 
 		public override void Update(float dt)
 		{
-			base.Update(dt);
 
 			if (IsAnimationStopped)
 			{
@@ -46,17 +47,28 @@ namespace DoodleJump.Rendering
 				return;
 			}
 
-			frameCounter++;
+			frameFloat += AnimationFPS * dt;
 
-			if (frameCounter >= AnimationDelayInFrames)
+			if (frameFloat >= 1)
 			{
-				frameCounter = 0;
+				frameFloat = 0;
 
 				SpriteIndex++;
 
 				if (SpriteIndex > MaxSpriteIndex)
 					SpriteIndex = MinSpriteIndex;
 			}
+			if (frameFloat <= -1)
+			{
+				frameFloat = 0;
+
+				SpriteIndex--;
+
+				if (SpriteIndex < 0)
+					SpriteIndex = MaxSpriteIndex;
+			}
+
+			base.Update(dt);
 		}
 	}
 }

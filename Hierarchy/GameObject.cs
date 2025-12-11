@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,13 +14,12 @@ namespace DoodleJump.Hierarchy
 
 	public abstract class GameObject
 	{
-		public PlayScreen Screen { get; set; }
 		public SpriteSheet Visualization { get; set; }
 
-		public Vector2 TopLeftPosition
+		public Vector2 Position
 		{
-			get => Visualization.TopLeftPosition;
-			set => Visualization.TopLeftPosition = value;
+			get => Visualization.Position;
+			set => Visualization.Position = value;
 		}
 
 		public Point Size => Visualization.Size;
@@ -32,6 +32,8 @@ namespace DoodleJump.Hierarchy
 		{
 			get
 			{
+				return false;
+				//TODO temp fix
 				Rectangle hb = Visualization.HitBoxRectangle;
 				int w = GameSettings.WindowWidth;
 				int h = GameSettings.WindowHeight;
@@ -47,11 +49,9 @@ namespace DoodleJump.Hierarchy
 		}
 		public float InitialRotation { get; set; } = 0f;
 
-		protected GameObject(SpriteSheet visualization, PlayScreen screen)
+		protected GameObject(SpriteSheet visualization)
 		{
 			Visualization = visualization;
-			Screen = screen;
-			screen.GameObjects.Add(this);
 		}
 		public Vector2 Forward
 		{
@@ -77,15 +77,21 @@ namespace DoodleJump.Hierarchy
 
 		public virtual void MoveGameObject()
 		{
-			TopLeftPosition += Velocity;
+			Position += Velocity;
 		}
 
-		public virtual void Draw(SpriteBatch spriteBatch)
+		public virtual void Draw(SpriteBatch spriteBatch, PolygonDrawer polygonDrawer)
 		{
 			if (!IsActive)
 				return;
 
 			Visualization.Draw(spriteBatch);
+			if (GameSettings.DebugDraw)
+			{
+				Rectangle hitboxUnrotated = Visualization.HitBoxRectangle;
+				polygonDrawer.DrawRectangle(hitboxUnrotated.Location.ToVector2(), hitboxUnrotated.Size.ToVector2(), Color.Yellow, 1);
+				polygonDrawer.DrawCircle(Position, 5, Color.Yellow, 2);
+			}
 		}
 
 		public bool IsCollidingWith(GameObject other)
@@ -94,13 +100,6 @@ namespace DoodleJump.Hierarchy
 			if (!IsActive || !other.IsActive) return false;
 
 			return Visualization.HitBoxRectangle.Intersects(other.Visualization.HitBoxRectangle);
-		}
-
-		public virtual void Destroy()
-		{
-			IsActive = false;
-			Screen.GameObjects.Remove(this);
-			Screen = null;
 		}
 	}
 }

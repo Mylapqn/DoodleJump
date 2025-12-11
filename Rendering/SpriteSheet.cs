@@ -16,8 +16,14 @@ namespace DoodleJump.Rendering
 		public int Rows { get; }
 		public int Columns { get; }
 
-		public Vector2 TopLeftPosition { get; set; }
+		public Vector2 Position { get; set; }
+		public Vector2 Origin { get; set; } = new Vector2(0.5f, 0.5f);
 		public Point Size { get; set; }     // Final on-screen size
+		public float Scale
+		{
+			get => (float)Size.X / SpriteSize.X;
+			set => Size = new Point((int)(SpriteSize.X * value), (int)(SpriteSize.Y * value));
+		}
 
 		public int SpriteIndex { get; set; }
 
@@ -29,8 +35,8 @@ namespace DoodleJump.Rendering
 
 		public Rectangle DestinationRectangle =>
 			new Rectangle(
-				(int)TopLeftPosition.X,
-				(int)TopLeftPosition.Y,
+				(int)(Position.X),
+				(int)(Position.Y),
 				Size.X,
 				Size.Y
 			);
@@ -54,12 +60,17 @@ namespace DoodleJump.Rendering
 			}
 		}
 
+		public SpriteSheet(Texture2D texture)
+			: this(texture, 1, 1)
+		{
+		}
+
 		public SpriteSheet(Texture2D texture, int rows, int columns)
 		{
 			Texture = texture;
 			Rows = rows;
 			Columns = columns;
-			TopLeftPosition = Vector2.Zero;
+			Position = Vector2.Zero;
 
 			Size = new Point(Texture.Width / columns, Texture.Height / rows);
 		}
@@ -77,12 +88,24 @@ namespace DoodleJump.Rendering
 				SourceRectangle,
 				Color.White,
 				Rotation,
-				Vector2.Zero,
+				new Vector2(SpriteSize.X * Origin.X, SpriteSize.Y * Origin.Y),
 				SpriteEffects.None,
 				0f
 			);
 		}
 
-		public Rectangle HitBoxRectangle => DestinationRectangle;
+		public Rectangle HitBoxRectangle
+		{
+			get
+			{
+				Rectangle destRect = DestinationRectangle;
+				return new Rectangle(
+					destRect.X - (int)(Size.X * Origin.X),
+					destRect.Y - (int)(Size.Y * Origin.Y),
+					destRect.Width,
+					destRect.Height
+				);
+			}
+		}
 	}
 }

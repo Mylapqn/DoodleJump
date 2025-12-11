@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using DoodleJump.Rendering;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -19,6 +20,6 @@ namespace DoodleJump.Hierarchy
 
 		public abstract void Update(float dt);
 
-		public abstract void Draw(SpriteBatch spriteBatch);
+		public abstract void Draw(SpriteBatch spriteBatch, PolygonDrawer polygonDrawer);
 	}
 }

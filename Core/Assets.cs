@@ -11,13 +11,11 @@ namespace DoodleJump.Core
 {
 	public class Assets
 	{
-		Game1 game;
 		public Dictionary<string, Texture2D> Textures { get; private set; } = [];
 		public Dictionary<string, SpriteFont> Fonts { get; private set; } = [];
 		public Dictionary<string, SoundEffect> Sounds { get; private set; } = [];
-		public Assets(Game1 game)
+		public Assets()
 		{
-			this.game = game;
 		}
 		public void LoadAsset<T>(string path, string name)
 		{
@@ -25,7 +23,7 @@ namespace DoodleJump.Core
 			{
 				path += "/";
 			}
-			T asset = game.Content.Load<T>(path+name);
+			T asset = Game1.Instance.Content.Load<T>(path+name);
 			if (typeof(T) == typeof(Texture2D))
 			{
 				Textures[name] = asset as Texture2D;
@@ -40,12 +38,14 @@ namespace DoodleJump.Core
 			}
 			else
 			{
-				Debug.WriteLine($"[Assets] Unsupported asset type: {typeof(T)}");
+				Debug.WriteLine($"Unsupported asset type: {typeof(T)}");
 			}
 		}
 		public void LoadAllAssets()
 		{
 			LoadAsset<Texture2D>("textures/sprites", "fire_circles_100x100");
+			LoadAsset<Texture2D>("textures/sprites", "platform");
+			LoadAsset<SpriteFont>("fonts", "default_font");
 		}
 	}
 }
