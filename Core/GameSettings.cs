@@ -12,6 +12,6 @@ namespace DoodleJump.Core
 		public static int WindowWidth { get; set; } = 1280;
 		public static int WindowHeight { get; set; } = 720;
 
-		public static Screen ActiveScreen { get; set; }
+		public static PlayScreen ActiveScreen { get; set; }
 	}
 }

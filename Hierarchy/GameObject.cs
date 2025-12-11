@@ -13,6 +13,7 @@ namespace DoodleJump.Hierarchy
 
 	public abstract class GameObject
 	{
+		public PlayScreen Screen { get; set; }
 		public SpriteSheet Visualization { get; set; }
 
 		public Vector2 TopLeftPosition
@@ -46,9 +47,11 @@ namespace DoodleJump.Hierarchy
 		}
 		public float InitialRotation { get; set; } = 0f;
 
-		protected GameObject(SpriteSheet visualization)
+		protected GameObject(SpriteSheet visualization, PlayScreen screen)
 		{
 			Visualization = visualization;
+			Screen = screen;
+			screen.GameObjects.Add(this);
 		}
 		public Vector2 Forward
 		{
@@ -91,6 +94,13 @@ namespace DoodleJump.Hierarchy
 			if (!IsActive || !other.IsActive) return false;
 
 			return Visualization.HitBoxRectangle.Intersects(other.Visualization.HitBoxRectangle);
+		}
+
+		public virtual void Destroy()
+		{
+			IsActive = false;
+			Screen.GameObjects.Remove(this);
+			Screen = null;
 		}
 	}
 }

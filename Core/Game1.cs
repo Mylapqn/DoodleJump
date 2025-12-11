@@ -1,5 +1,6 @@
 ﻿using DoodleJump.Hierarchy;
 using DoodleJump.Objects;
+using DoodleJump.Rendering;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -10,7 +11,8 @@ namespace DoodleJump.Core
     {
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
-        public Assets Assets;
+        public PolygonDrawer polygonDrawer;
+		public Assets Assets;
         public static Game1 Instance;
 
 		public Game1()
@@ -33,14 +35,21 @@ namespace DoodleJump.Core
             // TODO: Add your initialization logic here
 
             base.Initialize();
-            FireSprite fire = new FireSprite();
-        }
+            GameSettings.ActiveScreen = new PlayScreen();
+			FireSprite fire = new FireSprite(GameSettings.ActiveScreen);
+            fire.TopLeftPosition = new Vector2(200, 200);
+		}
 
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
+            polygonDrawer = new PolygonDrawer();
+            polygonDrawer.Initialize(GraphicsDevice, new BasicEffect(GraphicsDevice)
+            {
+                VertexColorEnabled = true
+            });
 			// TODO: use this.Content to load your game content here
-            Assets.LoadAllAssets();
+			Assets.LoadAllAssets();
 		}
 
         protected override void Update(GameTime gameTime)
@@ -63,8 +72,10 @@ namespace DoodleJump.Core
 
 			// TODO: Add your drawing code here
 			_spriteBatch.Begin();
+            polygonDrawer.Begin();
 			GameSettings.ActiveScreen?.Draw(_spriteBatch);
 			_spriteBatch.End();
+            polygonDrawer.End();
 
 			base.Draw(gameTime);
         }
