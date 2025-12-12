@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace DoodleJump.Objects
 {
-	internal class Platform : GameObject
+	public class Platform : GameObject
 	{
-		public float BounceForce = 15f;
+		public float BounceForce = 20f;
 		public Platform(SpriteSheet visualization) : base(visualization)
 		{
 			this.Visualization.Scale = 4;

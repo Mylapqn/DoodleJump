@@ -3,11 +3,14 @@ using DoodleJump.Hierarchy;
 using DoodleJump.Rendering;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using System.Collections.Generic;
 
 namespace DoodleJump.Objects
 {
 	internal class Player : GameObject
 	{
+		private bool grounded = false;
+		private Platform standingOn;
 		public Player() : base(new SpriteSheetAnimation(GameSettings.Assets.Textures["fire_circles_100x100"], 8, 8, 0, 59, 0))
 		{
 			(this.Visualization as SpriteSheetAnimation).AnimationDelayInFrames = 1;
@@ -18,7 +21,7 @@ namespace DoodleJump.Objects
 			Rectangle hb1 = this.Visualization.HitBoxRectangle;
 			Rectangle hb2 = obj.Visualization.HitBoxRectangle;
 			bool willFallThrough;
-			if(hb1.Bottom < hb2.Top && hb1.Bottom + Velocity.Y >= hb2.Top)
+			if (hb1.Bottom < hb2.Top && hb1.Bottom + Velocity.Y >= hb2.Top)
 			{
 				willFallThrough = true;
 			}
@@ -35,24 +38,26 @@ namespace DoodleJump.Objects
 			}
 			return false;
 		}
-		public override void Update(float dt)
+		public void CheckPlatformCollisions(IEnumerable<Platform> platforms)
 		{
-			bool grounded = false;
-			Vector2 vel = this.Velocity;
-			foreach (var obj in GameSettings.PlayScreen.GameObjects)
+			foreach (var platform in platforms)
 			{
-				if (obj == this)
-					continue;
-				if (IsStandingOn(obj) && vel.Y > 0)
+				if (IsStandingOn(platform) && Velocity.Y > 0)
 				{
-					vel.Y = 0;
+					standingOn = platform;
 					grounded = true;
-					break;
+					return;
 				}
 			}
+			grounded = false;
+			standingOn = null;
+		}
+		public override void Update(float dt)
+		{
+			Vector2 vel = this.Velocity;
 			if (grounded)
 			{
-				vel.Y = -20f;
+				vel.Y = -standingOn.BounceForce;
 			}
 			else
 			{
@@ -76,7 +81,7 @@ namespace DoodleJump.Objects
 			MoveGameObject();
 			Visualization.Update(dt);
 
-			if(this.Position.Y > GameSettings.PlayScreen.Camera.Position.Y + GameSettings.WindowHeight / 2f + 100)
+			if (this.Position.Y > GameSettings.PlayScreen.Camera.Position.Y + GameSettings.WindowHeight / 2f + 100)
 			{
 				GameSettings.EndScreen.Initialize();
 			}

@@ -45,6 +45,7 @@ namespace DoodleJump.Core
 		{
 			LoadAsset<Texture2D>("textures/sprites", "fire_circles_100x100");
 			LoadAsset<Texture2D>("textures/sprites", "platform");
+			LoadAsset<Texture2D>("textures/sprites", "platform_bounce");
 			LoadAsset<SpriteFont>("fonts", "default_font");
 		}
 	}
