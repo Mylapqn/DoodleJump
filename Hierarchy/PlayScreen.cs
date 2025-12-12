@@ -19,6 +19,8 @@ namespace DoodleJump.Hierarchy
 		public List<GameObject> GameObjects { get; private set; }
 		private Player Player { get; set; }
 		public Camera Camera;
+		private float elapsedTime = 0f;
+		private PlatformSpawner platformSpawner = new PlatformSpawner();
 
 		public override void Initialize()
 		{
@@ -33,25 +35,7 @@ namespace DoodleJump.Hierarchy
 			int currentY = 0;
 			for (int i = 0; i < 100; i++)
 			{
-				bool bounce = GameSettings.Random.NextDouble() < 0.1;
-				Platform platform1 = new Platform(new SpriteSheet(GameSettings.Assets.Textures[bounce ? "platform_bounce" : "platform"]));
-				this.GameObjects.Add(platform1);
-				this.Platforms.Add(platform1);
-				platform1.BounceForce = bounce ? 40 : 23;
-				if (currentX < -GameSettings.WindowWidth / 2 + 100)
-				{
-					currentX = -GameSettings.WindowWidth / 2 + 100;
-				}
-				if (currentX > GameSettings.WindowWidth / 2 - 100)
-				{
-					currentX = GameSettings.WindowWidth / 2 - 100;
-				}
-				platform1.Position = new Vector2(currentX, currentY);
-
-				int maxOffset = 350;
-				int offset = GameSettings.Random.Next(maxOffset * 2) - maxOffset;
-				currentY -= bounce? 100 : 250 + GameSettings.Random.Next(50) - 25;
-				currentX += offset;
+				
 			}
 			Player.Position = new Vector2(0, -150);
 		}
@@ -63,7 +47,20 @@ namespace DoodleJump.Hierarchy
 
 		public override void Update(float dt)
 		{
+			elapsedTime += dt;
 			Camera.Position += new Vector2(0, -200 * dt);
+
+			List<Platform> addedPlatforms = platformSpawner.SpawnPlaforms(Camera.Position.Y - GameSettings.WindowHeight / 2);
+			Platforms.AddRange(addedPlatforms);
+			GameObjects.AddRange(addedPlatforms);
+
+			List<Platform> removedPlatforms = platformSpawner.GetBottomPlatformsToRemove(Platforms, Camera.Position.Y + GameSettings.WindowHeight / 2);
+			foreach (var platform in removedPlatforms)
+			{
+				Platforms.Remove(platform);
+				GameObjects.Remove(platform);
+			}
+
 
 			Player.CheckPlatformCollisions(Platforms);
 			foreach (var obj in GameObjects)
@@ -77,8 +74,6 @@ namespace DoodleJump.Hierarchy
 
 		public override void Draw(SpriteBatch spriteBatch, PolygonDrawer polygonDrawer)
 		{
-			Debug.WriteLine("draw");
-
 			Matrix world = Matrix.Identity;
 			Matrix view = Camera.GetViewMatrix(false);
 			Matrix reflection = Matrix.CreateScale(new Vector3(1, -1, 1));
