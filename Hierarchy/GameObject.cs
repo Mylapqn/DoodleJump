@@ -67,7 +67,7 @@ namespace DoodleJump.Hierarchy
 			if (!IsActive)
 				return;
 
-			MoveGameObject();
+			MoveGameObject(dt);
 
 			if (IsOutOfBounds)
 				IsActive = false;
@@ -75,9 +75,9 @@ namespace DoodleJump.Hierarchy
 			Visualization.Update(dt);
 		}
 
-		public virtual void MoveGameObject()
+		public virtual void MoveGameObject(float dt)
 		{
-			Position += Velocity;
+			Position += Velocity * dt;
 		}
 
 		public virtual void Draw(SpriteBatch spriteBatch, PolygonDrawer polygonDrawer)
