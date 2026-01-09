@@ -19,6 +19,7 @@ namespace DoodleJump.Hierarchy
 		public override void Initialize()
 		{
 			GameSettings.ActiveScreen = this;
+			GameSettings.TimeScale = 1f;
 		}
 
 		public override void LoadContent(ContentManager content)
@@ -29,6 +30,10 @@ namespace DoodleJump.Hierarchy
 		public override void Update(float dt)
 		{
 			if (Input.IsMouseButtonReleased(Input.MouseButton.Left))
+			{
+				Game1.Instance.StartGame();
+			}
+			if (Input.IsKeyReleased(Microsoft.Xna.Framework.Input.Keys.Escape))
 			{
 				Game1.Instance.Exit();
 			}
@@ -50,11 +55,29 @@ namespace DoodleJump.Hierarchy
 				);
 			spriteBatch.DrawStringAdvanced(
 				font: GameSettings.Assets.Fonts["default_font"],
-				text: "Click anywhere to close the game",
-				position: new Vector2(GameSettings.WindowWidth / 2, GameSettings.WindowHeight / 2+200),
+				text: $"Score: {GameSettings.Score}",
+				position: new Vector2(GameSettings.WindowWidth / 2, GameSettings.WindowHeight / 2 + 100),
 				alignHorizontal: 0.5f,
 				alignVertical: 0.5f,
 				color: Color.White,
+				scale: .5f
+				);
+			spriteBatch.DrawStringAdvanced(
+				font: GameSettings.Assets.Fonts["default_font"],
+				text: "Click anywhere to restart",
+				position: new Vector2(GameSettings.WindowWidth / 2, GameSettings.WindowHeight / 2 + 200),
+				alignHorizontal: 0.5f,
+				alignVertical: 0.5f,
+				color: Color.Gray,
+				scale: .3f
+				);
+			spriteBatch.DrawStringAdvanced(
+				font: GameSettings.Assets.Fonts["default_font"],
+				text: "Press ESC to close the game",
+				position: new Vector2(GameSettings.WindowWidth / 2, GameSettings.WindowHeight / 2 + 250),
+				alignHorizontal: 0.5f,
+				alignVertical: 0.5f,
+				color: Color.Gray,
 				scale: .3f
 				);
 			spriteBatch.End();

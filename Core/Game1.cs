@@ -35,13 +35,13 @@ namespace DoodleJump.Core
 			// TODO: Add your initialization logic here
 
 			base.Initialize();
+			StartGame();
+		}
 
-			GameSettings.MenuScreen = new MenuScreen();
-			GameSettings.PlayScreen = new PlayScreen();
-			GameSettings.EndScreen = new EndScreen();
-
+		public void StartGame()
+		{
+			GameSettings.Initialize();
 			GameSettings.MenuScreen.Initialize();
-
 		}
 
 		protected override void LoadContent()
@@ -59,11 +59,10 @@ namespace DoodleJump.Core
 
 		protected override void Update(GameTime gameTime)
 		{
-			if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-				Exit();
 
 			// TODO: Add your update logic here
 			float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
+			dt *= GameSettings.TimeScale;
 
 			Input.Update();
 			GameSettings.ActiveScreen?.Update(dt);

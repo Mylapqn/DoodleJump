@@ -126,23 +126,37 @@ namespace DoodleJump.Rendering
 			}
 			triangleListCache.Add(vertices);
 		}
-		public void DrawRectangle(Vector2 topLeft, Vector2 dimensions, Color color, int strokeWidth = 0)
+		public void DrawRectangle(Vector2 topLeft, Vector2 dimensions, Color color, int strokeWidth = 0, float rotation = 0)
 		{
+			Vector2 topRight = new Vector2(topLeft.X + dimensions.X, topLeft.Y);
+			Vector2 bottomRight = topLeft + dimensions;
+			Vector2 bottomLeft = new Vector2(topLeft.X, topLeft.Y + dimensions.Y);
+			if(rotation != 0)
+			{
+				Vector2 center = topLeft + dimensions / 2;
+				Matrix rotationMatrix = Matrix.CreateTranslation(-center.X, -center.Y, 0) *
+									   Matrix.CreateRotationZ(rotation) *
+									   Matrix.CreateTranslation(center.X, center.Y, 0);
+				topLeft = Vector2.Transform(topLeft, rotationMatrix);
+				topRight = Vector2.Transform(topRight, rotationMatrix);
+				bottomRight = Vector2.Transform(bottomRight, rotationMatrix);
+				bottomLeft = Vector2.Transform(bottomLeft, rotationMatrix);
+			}
 			if (strokeWidth > 0)
 			{
-				DrawLine(topLeft, topLeft + new Vector2(dimensions.X, 0), color, strokeWidth);
-				DrawLine(topLeft + new Vector2(dimensions.X, 0), topLeft + dimensions, color, strokeWidth);
-				DrawLine(topLeft + dimensions, topLeft + new Vector2(0, dimensions.Y), color, strokeWidth);
-				DrawLine(topLeft + new Vector2(0, dimensions.Y), topLeft, color, strokeWidth);
+				DrawLine(topLeft, topRight, color, strokeWidth);
+				DrawLine(topRight, bottomRight, color, strokeWidth);
+				DrawLine(bottomRight, bottomLeft, color, strokeWidth);
+				DrawLine(bottomLeft, topLeft, color, strokeWidth);
 			}
 			else
 			{
 				List<Vector2> points =
 				[
 					topLeft,
-					topLeft + new Vector2(dimensions.X, 0),
-					topLeft + dimensions,
-					topLeft + new Vector2(0, dimensions.Y),
+					topRight,
+					bottomRight,
+					bottomLeft,
 				];
 				DrawPolygon(points, color);
 			}

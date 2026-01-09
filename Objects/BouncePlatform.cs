@@ -14,7 +14,7 @@ namespace DoodleJump.Objects
 		public BouncePlatform(SpriteSheet visualization) : base(visualization)
 		{
 			this.Visualization.Scale = 4;
-			BounceForce = 60f;
+			BounceForce = 200f;
 		}
 	}
 }

@@ -25,13 +25,14 @@ namespace DoodleJump.Hierarchy
 				Platform newPlatform = new Platform(new SpriteSheet(GameSettings.Assets.Textures[bounce ? "platform_bounce" : "platform"]));
 				addedPlatforms.Add(newPlatform);
 				newPlatform.BounceForce = bounce ? 40 : 23;
-				if (currentPosition.X < -GameSettings.WindowWidth / 2 + 100)
+				const float platformWidth = 50;
+				if (currentPosition.X < -GameSettings.GameWidth / 2 + platformWidth)
 				{
-					currentPosition.X = -GameSettings.WindowWidth / 2 + 100;
+					currentPosition.X = GameSettings.GameWidth / 2 - platformWidth;
 				}
-				if (currentPosition.X > GameSettings.WindowWidth / 2 - 100)
+				if (currentPosition.X > GameSettings.GameWidth / 2 - platformWidth)
 				{
-					currentPosition.X = GameSettings.WindowWidth / 2 - 100;
+					currentPosition.X = -GameSettings.GameWidth / 2 + platformWidth;
 				}
 				newPlatform.Position = currentPosition;
 

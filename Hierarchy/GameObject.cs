@@ -22,6 +22,8 @@ namespace DoodleJump.Hierarchy
 			set => Visualization.Position = value;
 		}
 
+		
+
 		public Point Size => Visualization.Size;
 
 		public bool IsActive { get; set; } = true;
@@ -77,7 +79,7 @@ namespace DoodleJump.Hierarchy
 
 		public virtual void MoveGameObject(float dt)
 		{
-			Position += Velocity * dt;
+			Position += Velocity * dt * 60;
 		}
 
 		public virtual void Draw(SpriteBatch spriteBatch, PolygonDrawer polygonDrawer)
@@ -89,7 +91,7 @@ namespace DoodleJump.Hierarchy
 			if (GameSettings.DebugDraw)
 			{
 				Rectangle hitboxUnrotated = Visualization.HitBoxRectangle;
-				polygonDrawer.DrawRectangle(hitboxUnrotated.Location.ToVector2(), hitboxUnrotated.Size.ToVector2(), Color.Yellow, 1);
+				polygonDrawer.DrawRectangle(hitboxUnrotated.Location.ToVector2(), hitboxUnrotated.Size.ToVector2(), Color.Yellow, 1, this.Visualization.Rotation);
 				polygonDrawer.DrawCircle(Position, 5, Color.Yellow, 2);
 			}
 		}
