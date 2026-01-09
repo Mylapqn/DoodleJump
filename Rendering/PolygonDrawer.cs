@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 namespace DoodleJump.Rendering
 {
@@ -111,6 +112,35 @@ namespace DoodleJump.Rendering
 			vertices[3] = new VertexPositionColor(new Vector3(end - normal, 0), color);
 			triangleStripCache.Add(vertices);
 		}
+		public void DrawTrail(List<Vector2> points, Color color, float width)
+		{
+			DrawTrail(points.Select(x => new LineTrail.TrailPoint(x, color)).ToList(), widthFrom: width, widthTo: width);
+		}
+		public void DrawTrail(List<LineTrail.TrailPoint> points, float widthFrom = 0, float widthTo = 5, float alphaFrom = 0, float alphaTo = 1)
+		{
+			if (points.Count < 2) return;
+			VertexPositionColor[] vertices = new VertexPositionColor[points.Count * 2];
+			for (int i = 0; i < points.Count; i++)
+			{
+				LineTrail.TrailPoint trailPoint = points[i];
+				Color color = trailPoint.color;
+				//float width = widths[Math.Min(i, widths.Count - 1)];
+				float width = MathHelper.Lerp(widthFrom, widthTo, (float)i / (points.Count - 1));
+				float alpha = MathHelper.Lerp(alphaFrom, alphaTo, (float)i / (points.Count - 1));
+				Vector2 p = trailPoint.position;
+				Vector2 normal = Vector2.Zero;
+				if (i > 0)
+				{
+					Vector2 prev = points[i - 1].position;
+					Vector2 diff = prev - p;
+					normal = new Vector2(diff.Y, -diff.X);
+					normal.Normalize();
+				}
+				vertices[i * 2] = new VertexPositionColor(new Vector3(p + normal * width, 0), ColorUtilities.Premultiply(color, alpha));
+				vertices[i * 2 + 1] = new VertexPositionColor(new Vector3(p - normal * width, 0), ColorUtilities.Premultiply(color, alpha));
+			}
+			triangleStripCache.Add(vertices);
+		}
 		public void DrawPolygon(List<Vector2> points, Color color)
 		{
 			if (points.Count < 3) return;
@@ -131,7 +161,7 @@ namespace DoodleJump.Rendering
 			Vector2 topRight = new Vector2(topLeft.X + dimensions.X, topLeft.Y);
 			Vector2 bottomRight = topLeft + dimensions;
 			Vector2 bottomLeft = new Vector2(topLeft.X, topLeft.Y + dimensions.Y);
-			if(rotation != 0)
+			if (rotation != 0)
 			{
 				Vector2 center = topLeft + dimensions / 2;
 				Matrix rotationMatrix = Matrix.CreateTranslation(-center.X, -center.Y, 0) *

@@ -12,9 +12,9 @@ namespace DoodleJump.Objects
 {
 	public class Platform : GameObject
 	{
-		public float BounceForce = 20f;
-		public float offsetTimer = 0;
-		public const float OffsetDuration = 0.5f;
+		public float BounceForce;
+		public float jumpOffsetTimer = 0;
+		public const float JumpOffsetDuration = 0.5f;
 		public Vector2 OffsetPosition
 		{
 			get; set;
@@ -26,18 +26,19 @@ namespace DoodleJump.Objects
 		public Platform(SpriteSheet visualization) : base(visualization)
 		{
 			this.Visualization.Scale = 4;
+			this.BounceForce = 23f;
 		}
 		public virtual void Bounce(Player player)
 		{
-			offsetTimer = OffsetDuration;
+			jumpOffsetTimer = JumpOffsetDuration;
 			OffsetDirection = Vector2.Normalize(new Vector2(player.Velocity.X, -30));
 		}
 		public override void Update(float dt)
 		{
-			if(offsetTimer > 0)
+			if(jumpOffsetTimer > 0)
 			{
-				offsetTimer -= dt;
-				float progress = 1 - (offsetTimer / OffsetDuration);
+				jumpOffsetTimer -= dt;
+				float progress = 1 - (jumpOffsetTimer / JumpOffsetDuration);
 				float offsetIntensity = -(float)(Math.Sin(progress * Math.PI) * 30);
 				OffsetPosition = OffsetDirection * offsetIntensity;
 			}

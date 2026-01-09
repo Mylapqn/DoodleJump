@@ -12,6 +12,12 @@ namespace DoodleJump.Hierarchy
 {
 	public class PlatformSpawner
 	{
+		public enum PlatformType
+		{
+			Normal,
+			Bounce,
+			Moving
+		}
 		public Platform topPlatform;
 		private Vector2 currentPosition = new Vector2();
 		public PlatformSpawner() { }
@@ -21,10 +27,26 @@ namespace DoodleJump.Hierarchy
 			List<Platform> addedPlatforms = new();
 			while (currentPosition.Y > topY - 100)
 			{
-				bool bounce = GameSettings.Random.NextDouble() < 0.1;
-				Platform newPlatform = new Platform(new SpriteSheet(GameSettings.Assets.Textures[bounce ? "platform_bounce" : "platform"]));
+				PlatformType platformType = PlatformType.Normal;
+				if (GameSettings.Random.NextDouble() < 0.1) platformType = PlatformType.Bounce;
+				else if (GameSettings.Random.NextDouble() < 0.1) platformType = PlatformType.Moving;
+
+				Platform newPlatform;
+				switch (platformType)
+				{
+					case PlatformType.Bounce:
+						newPlatform = new BouncePlatform(new SpriteSheet(GameSettings.Assets.Textures["platform_bounce"]));
+						break;
+					case PlatformType.Moving:
+						newPlatform = new MovingPlatform(new SpriteSheet(GameSettings.Assets.Textures["platform_moving"]));
+						break;
+					default:
+					case PlatformType.Normal:
+						newPlatform = new Platform(new SpriteSheet(GameSettings.Assets.Textures["platform"]));
+						break;
+
+				}
 				addedPlatforms.Add(newPlatform);
-				newPlatform.BounceForce = bounce ? 40 : 23;
 				const float platformWidth = 50;
 				if (currentPosition.X < -GameSettings.GameWidth / 2 + platformWidth)
 				{
@@ -37,8 +59,23 @@ namespace DoodleJump.Hierarchy
 				newPlatform.Position = currentPosition;
 
 				int maxOffset = 350;
+
+				switch (platformType)
+				{
+					case PlatformType.Bounce:
+						currentPosition.Y -= 100;
+						break;
+					case PlatformType.Moving:
+						currentPosition.Y -= 150;
+						break;
+					default:
+					case PlatformType.Normal:
+						currentPosition.Y -= 250 + GameSettings.Random.Next(50) - 25;
+						break;
+
+				}
+
 				int offset = GameSettings.Random.Next(maxOffset * 2) - maxOffset;
-				currentPosition.Y -= bounce ? 100 : 250 + GameSettings.Random.Next(50) - 25;
 				currentPosition.X += offset;
 			}
 			return addedPlatforms;

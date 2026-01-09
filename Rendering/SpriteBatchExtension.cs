@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace DoodleJump.Rendering
 {
-	static class SpriteBatchTextExtension
+	static class SpriteBatchExtension
 	{
 		public static void DrawStringAdvanced(this SpriteBatch spriteBatch, SpriteFont font, string text, Vector2 position, Color color = new Color(), float alignHorizontal = 0, float alignVertical = 0, float scale = 1, float rotation = 0)
 		{

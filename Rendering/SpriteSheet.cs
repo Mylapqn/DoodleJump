@@ -28,7 +28,10 @@ namespace DoodleJump.Rendering
 		public int SpriteIndex { get; set; }
 
 		public float Rotation { get; set; } = 0f;
+		public SpriteEffects Flip { get; set; } = SpriteEffects.None;
 		public float RotationSpeed { get; set; } = 0f;
+
+		public Color Color { get; set; } = Color.White;
 
 		public Point SpriteSize =>
 			new Point(Texture.Width / Columns, Texture.Height / Rows);
@@ -86,10 +89,10 @@ namespace DoodleJump.Rendering
 				Texture,
 				DestinationRectangle,
 				SourceRectangle,
-				Color.White,
+				Color,
 				Rotation,
 				new Vector2(SpriteSize.X * Origin.X, SpriteSize.Y * Origin.Y),
-				SpriteEffects.None,
+				Flip,
 				0f
 			);
 		}

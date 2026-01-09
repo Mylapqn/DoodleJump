@@ -9,12 +9,13 @@ namespace DoodleJump.Core
 {
 	public static partial class GameSettings
 	{
-		public static int WindowWidth { get; set; } = 1280;
+		public static int WindowWidth { get; set; } = 880;
 		public static int WindowHeight { get; set; } = 1280;
-		public static int GameWidth = 1000;
+		public static int GameWidth { get; set; } = 880;
 
 		public static float TimeScale { get; set; } = 1.0f;
-		public static int Score { get; set; } = 0;
+		public static float ScoreDecimal { get; set; } = 0;
+		public static int PlatformStreak { get; set; } = 1;
 
 		public static bool DebugDraw { get; set; } = false;
 
@@ -33,7 +34,8 @@ namespace DoodleJump.Core
 			MenuScreen = new MenuScreen();
 			EndScreen = new EndScreen();
 			TimeScale = 1f;
-			Score = 0;
+			ScoreDecimal = 0;
+			PlatformStreak = 0;
 			Random = new Random();
 		}
 	}

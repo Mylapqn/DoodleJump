@@ -14,8 +14,6 @@ namespace DoodleJump.Rendering
 		public int MaxSpriteIndex { get; set; }
 		public int IdleSpriteIndex { get; set; }
 
-		public int AnimationDelayInFrames { get; set; } = 5;
-
 		public bool IsAnimationStopped { get; set; }
 
 		int frameCounter = 0;

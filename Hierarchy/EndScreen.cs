@@ -55,7 +55,7 @@ namespace DoodleJump.Hierarchy
 				);
 			spriteBatch.DrawStringAdvanced(
 				font: GameSettings.Assets.Fonts["default_font"],
-				text: $"Score: {GameSettings.Score}",
+				text: $"Score: {(int)GameSettings.ScoreDecimal}",
 				position: new Vector2(GameSettings.WindowWidth / 2, GameSettings.WindowHeight / 2 + 100),
 				alignHorizontal: 0.5f,
 				alignVertical: 0.5f,

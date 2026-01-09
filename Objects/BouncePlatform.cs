@@ -1,11 +1,4 @@
-﻿using DoodleJump.Hierarchy;
-using DoodleJump.Rendering;
-using Microsoft.Xna.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using DoodleJump.Rendering;
 
 namespace DoodleJump.Objects
 {
@@ -13,8 +6,7 @@ namespace DoodleJump.Objects
 	{
 		public BouncePlatform(SpriteSheet visualization) : base(visualization)
 		{
-			this.Visualization.Scale = 4;
-			BounceForce = 200f;
+			BounceForce = 40f;
 		}
 	}
 }

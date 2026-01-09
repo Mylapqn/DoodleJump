@@ -46,10 +46,14 @@ namespace DoodleJump.Core
 			LoadAsset<Texture2D>("textures/sprites", "fire_circles_100x100");
 			LoadAsset<Texture2D>("textures/sprites", "platform");
 			LoadAsset<Texture2D>("textures/sprites", "platform_bounce");
+			LoadAsset<Texture2D>("textures/sprites", "platform_moving");
+			LoadAsset<Texture2D>("textures/sprites", "cat_jump");
+			LoadAsset<Texture2D>("textures/sprites", "vignette");
 			LoadAsset<SpriteFont>("fonts", "default_font");
 			LoadAsset<Texture2D>("textures/background", "fg_city");
 			LoadAsset<Texture2D>("textures/background", "bg_city_1");
 			LoadAsset<Texture2D>("textures/background", "bg_city_2");
+			LoadAsset<Texture2D>("textures/background", "bg_sky");
 		}
 	}
 }
