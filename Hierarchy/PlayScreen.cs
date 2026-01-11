@@ -20,11 +20,14 @@ namespace DoodleJump.Hierarchy
 		public List<GameObject> GameObjects { get; private set; }
 		private Player Player { get; set; }
 		public Camera Camera;
-		private float elapsedTime = 0f;
 		private PlatformSpawner platformSpawner = new PlatformSpawner();
 		private List<BackgroundLayer> backgroundLayers = new List<BackgroundLayer>();
 		private float lastMaxHeight = 0f;
 		private float ScoreMultiplier => MathF.Min(4, 1 + (float)GameSettings.PlatformStreak / 20f);
+		private bool slowMode = false;
+		private TextPopupManager PopupManager = new TextPopupManager();
+		private List<HighScore> highScores;
+
 
 		public override void Initialize()
 		{
@@ -32,6 +35,7 @@ namespace DoodleJump.Hierarchy
 			this.Camera = new Camera();
 			this.GameObjects = new List<GameObject>();
 			this.Platforms = new List<Platform>();
+			highScores = GameSettings.SaveSystem.LoadHighScores();
 
 			BackgroundLayer sky = new BackgroundLayer(new SpriteSheet(GameSettings.Assets.Textures["bg_sky"]), 1f, new Vector2(0, 800));
 			GameObjects.Add(sky);
@@ -51,10 +55,15 @@ namespace DoodleJump.Hierarchy
 
 
 
-			Player = new Player();
+			Player = new Player(PopupManager);
 			this.GameObjects.Add(Player);
-			Player.Position = new Vector2(0, -150);
 			GameSettings.TimeScale = 1f;
+
+			Platform initialPlatform = new Platform(new SpriteSheet(GameSettings.Assets.Textures["platform"])) { };
+			initialPlatform.Position = new Vector2(0, initialPlatform.Visualization.Size.Y / 2);
+			initialPlatform.Visualization.Size = new Point(GameSettings.GameWidth, initialPlatform.Visualization.Size.Y);
+			Platforms.Add(initialPlatform);
+			GameObjects.Add(initialPlatform);
 		}
 
 		public override void LoadContent(ContentManager content)
@@ -67,14 +76,18 @@ namespace DoodleJump.Hierarchy
 			if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Input.IsKeyReleased(Keys.Escape))
 				GameSettings.EndScreen.Initialize();
 
-			elapsedTime += dt;
-			Camera.Position += new Vector2(0, -200 * dt);
+			if (!Player.walking)
+			{
+				GameSettings.ElapsedGameTime += dt;
+				Camera.Position += new Vector2(0, -200 * dt);
+			}
+			Camera.Zoom = MathF.Max(1f, 1.1f - GameSettings.ElapsedGameTime / 16f);
 
-			List<Platform> addedPlatforms = platformSpawner.SpawnPlaforms(Camera.Position.Y - GameSettings.WindowHeight / 2);
+			List<Platform> addedPlatforms = platformSpawner.SpawnPlatforms(Camera.Position.Y - GameSettings.WindowHeight / 2);
 			Platforms.AddRange(addedPlatforms);
 			GameObjects.AddRange(addedPlatforms);
 
-			List<Platform> removedPlatforms = platformSpawner.GetBottomPlatformsToRemove(Platforms, Camera.Position.Y + GameSettings.WindowHeight / 2);
+			List<Platform> removedPlatforms = platformSpawner.GetBottomPlatformsToRemove(Platforms, Camera.Position.Y + GameSettings.WindowHeight / 2 / Camera.Zoom);
 			foreach (var platform in removedPlatforms)
 			{
 				Platforms.Remove(platform);
@@ -90,11 +103,20 @@ namespace DoodleJump.Hierarchy
 					obj.Update(dt);
 				}
 			}
-			GameSettings.TimeScale = 1f + MathF.Min(Player.maxHeight / 50000f, 3f);
-			GameSettings.TimeScale *= 0.3f;
-			float addedScore = (Player.maxHeight - lastMaxHeight) / 100 * ScoreMultiplier;
+			PopupManager.Update(dt);
+			if (Input.IsKeyReleased(Keys.F))
+			{
+				slowMode = !slowMode;
+			}
+
+			GameSettings.TimeScale = 1f + MathF.Min(GameSettings.MaxHeightReached / 100000f, 3f);
+			if (slowMode)
+			{
+				GameSettings.TimeScale *= 0.5f;
+			}
+			float addedScore = (GameSettings.MaxHeightReached - lastMaxHeight) / 100 * ScoreMultiplier;
 			GameSettings.ScoreDecimal += addedScore;
-			lastMaxHeight = Player.maxHeight;
+			lastMaxHeight = GameSettings.MaxHeightReached;
 		}
 
 		public override void Draw(SpriteBatch spriteBatch, PolygonDrawer polygonDrawer)
@@ -111,12 +133,29 @@ namespace DoodleJump.Hierarchy
 			spriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: Camera.GetViewMatrix(true));
 			polygonDrawer.Begin(viewMatrix: worldViewProjection);
 
-			Vector2 screen = new Vector2(GameSettings.WindowWidth, GameSettings.WindowHeight);
-			int sideWidth = (GameSettings.WindowWidth - GameSettings.GameWidth) / 2;
-			/*polygonDrawer.DrawRectangle(Camera.Position - screen / 2, new Vector2(sideWidth, screen.Y), Color.Black);
-			polygonDrawer.DrawRectangle(Camera.Position + new Vector2(screen.X / 2 - sideWidth, -screen.Y / 2), new Vector2(sideWidth, screen.Y), Color.Black);*/
-			polygonDrawer.DrawRectangle(new Vector2(-screen.X / 2, 0), screen, Color.Black);
+			DrawObjects(spriteBatch, polygonDrawer);
+			DrawHighScoresInWorld(spriteBatch, polygonDrawer);
 
+			if (Camera.CanSeePoint(new Vector2(0, -100)))
+			{
+				spriteBatch.Draw(GameSettings.Assets.Textures["pixel"], new Rectangle(-GameSettings.WindowWidth, -1, GameSettings.WindowWidth * 2, GameSettings.WindowHeight), new Rectangle(0, 0, 1, 1), ColorUtilities.ColorFromHex(0x101010FF));
+				DrawTutorial(spriteBatch);
+			}
+
+			PopupManager.Draw(spriteBatch, polygonDrawer);
+
+			spriteBatch.End();
+			polygonDrawer.End();
+
+
+			//Draw UI
+			spriteBatch.Begin(samplerState: SamplerState.LinearClamp);
+			DrawUI(spriteBatch);
+			spriteBatch.End();
+		}
+
+		private void DrawObjects(SpriteBatch spriteBatch, PolygonDrawer polygonDrawer)
+		{
 			foreach (var background in backgroundLayers)
 			{
 				background.updateCameraPosition(Camera);
@@ -129,13 +168,45 @@ namespace DoodleJump.Hierarchy
 					obj.Draw(spriteBatch, polygonDrawer);
 				}
 			}
+		}
 
-			spriteBatch.End();
-			polygonDrawer.End();
+		private void DrawHighScoresInWorld(SpriteBatch spriteBatch, PolygonDrawer polygonDrawer)
+		{
+			float textScale = 0.3f;
+			for (int i = 0; i < Math.Min(10, highScores.Count); i++)
+			{
+				float padding = 100;
+				var hs = highScores[i];
+				float width = spriteBatch.DrawStringAdvanced(
+					font: GameSettings.Assets.Fonts["default_font"],
+					text: $"{i + 1}. {hs.PlayerName} - {hs.Score}",
+					position: new Vector2(0, -hs.ReachedHeight),
+					color: ColorUtilities.Premultiply(Color.White, 0.5f),
+					alignHorizontal: 0.5f,
+					alignVertical: 0f,
+					scale: textScale).X;
+				polygonDrawer.DrawLine(
+					start: new Vector2(-GameSettings.WindowWidth, -hs.ReachedHeight),
+					end: new Vector2(-width / 2 - padding, -hs.ReachedHeight),
+					color: ColorUtilities.Premultiply(Color.White, 0.5f),
+					width: 2f
+					);
+				polygonDrawer.DrawLine(
+					start: new Vector2(GameSettings.WindowWidth, -hs.ReachedHeight),
+					end: new Vector2(width / 2 + padding, -hs.ReachedHeight),
+					color: ColorUtilities.Premultiply(Color.White, 0.5f),
+					width: 2f
+					);
+			}
+		}
 
+		private void DrawUI(SpriteBatch spriteBatch)
+		{
+			float uiOpacity = MathF.Min(1, GameSettings.ElapsedGameTime / 2f);
+			Color mainColor = ColorUtilities.Premultiply(Color.White, uiOpacity);
+			Color mutedColor = ColorUtilities.Premultiply(Color.White, uiOpacity * .5f);
+			Color streakColor = ColorUtilities.Premultiply(ColorUtilities.StreakColor(GameSettings.PlatformStreak), uiOpacity);
 
-			//Draw UI
-			spriteBatch.Begin();
 
 			spriteBatch.Draw(GameSettings.Assets.Textures["vignette"], new Rectangle(0, 0, GameSettings.WindowWidth, GameSettings.WindowHeight), Color.White);
 
@@ -143,7 +214,7 @@ namespace DoodleJump.Hierarchy
 				font: GameSettings.Assets.Fonts["default_font"],
 				text: $"SCORE",
 				position: new Vector2(100, 150),
-				color: Color.White,
+				color: mainColor,
 				alignHorizontal: 0f,
 				alignVertical: 0f,
 				scale: 0.3f);
@@ -151,12 +222,34 @@ namespace DoodleJump.Hierarchy
 				font: GameSettings.Assets.Fonts["default_font"],
 				text: $"{(int)GameSettings.ScoreDecimal}",
 				position: new Vector2(100, 230),
-				color: Color.White,
+				color: mainColor,
 				alignHorizontal: 0f,
-				alignVertical: 0.5f,
+				alignVertical: 0.6f,
 				scale: 1f);
 
-			Color streakColor = ColorUtilities.StreakColor(GameSettings.PlatformStreak);
+			TimeSpan time = TimeSpan.FromSeconds(GameSettings.ElapsedGameTime);
+			spriteBatch.DrawStringAdvanced(
+				font: GameSettings.Assets.Fonts["default_font"],
+				text: $"{time.Minutes}:{time.Seconds}.{time.Milliseconds / 10}",
+				position: new Vector2(100, 270),
+				color: mutedColor,
+				alignHorizontal: 0f,
+				alignVertical: 0f,
+				scale: 0.3f);
+
+			/*if (Player.poweredUp)
+			{
+				spriteBatch.DrawStringAdvanced(
+					font: GameSettings.Assets.Fonts["default_font"],
+					text: "SUPER CAT",
+					position: new Vector2(GameSettings.WindowWidth / 2, 230),
+					color: ColorUtilities.HSV(GameSettings.ElapsedGameTime, 1, 1, 1),
+					alignHorizontal: 0.5f,
+					alignVertical: 0.6f,
+					scale: 1f);
+			}*/
+
+
 
 			spriteBatch.DrawStringAdvanced(
 				font: GameSettings.Assets.Fonts["default_font"],
@@ -175,23 +268,63 @@ namespace DoodleJump.Hierarchy
 				position: new Vector2(GameSettings.WindowWidth - 100 - width / 2 * 0.5f, 230),
 				color: streakColor,
 				alignHorizontal: 0.5f,
-				alignVertical: 0.5f,
+				alignVertical: 0.6f,
 				scale: 0.5f + MathF.Min(0.5f, MathF.Pow(GameSettings.PlatformStreak / 100f, 1.2f)) + MathF.Sin(Player.timeSinceJump * 20) * MathF.Max(0, 1f - Player.timeSinceJump / .3f) * MathF.Min(0.5f, GameSettings.PlatformStreak / 50f),
 				rotation: MathF.Cos(Player.timeSinceJump * 30) * MathF.Max(0, 1f - Player.timeSinceJump / .3f) * MathF.Min(0.3f, GameSettings.PlatformStreak / 50f)
 				);
 
 			spriteBatch.DrawStringAdvanced(
 				font: GameSettings.Assets.Fonts["default_font"],
-				text: $"{ScoreMultiplier.ToString("0.#")}x multiplier",
+				text: $"{ScoreMultiplier.ToString("0.#")}x",
 				position: new Vector2(GameSettings.WindowWidth - 100, 270),
 				color: streakColor,
 				alignHorizontal: 1f,
 				alignVertical: 0f,
 				scale: 0.3f);
+		}
 
-			spriteBatch.End();
+		private void DrawTutorial(SpriteBatch spriteBatch)
+		{
+			float startTextHeight = 200;
+			float startTextSpacing = 80;
+			float moveTextHeight = -130;
+			float smallTextScale = 0.4f;
+			float totalOpacity = 1 - MathF.Min(1, GameSettings.ElapsedGameTime / 2f);
+			Color tutorialColor = ColorUtilities.Premultiply(Color.White, totalOpacity);
+			Color tutorialOffColor = ColorUtilities.Premultiply(Color.White, .5f * totalOpacity);
 
-
+			spriteBatch.DrawStringAdvanced(
+				font: GameSettings.Assets.Fonts["default_font"],
+				text: $"[A] [D] MOVE",
+				position: new Vector2(0, moveTextHeight),
+				color: tutorialOffColor,
+				alignHorizontal: 0.5f,
+				alignVertical: 0.5f,
+				scale: smallTextScale);
+			spriteBatch.DrawStringAdvanced(
+				font: GameSettings.Assets.Fonts["default_font"],
+				text: $"PRESS",
+				position: new Vector2(0, startTextHeight - startTextSpacing),
+				color: tutorialOffColor,
+				alignHorizontal: 0.5f,
+				alignVertical: 0.5f,
+				scale: smallTextScale);
+			spriteBatch.DrawStringAdvanced(
+				font: GameSettings.Assets.Fonts["default_font"],
+				text: $"SPACE",
+				position: new Vector2(0, startTextHeight),
+				color: tutorialColor,
+				alignHorizontal: 0.5f,
+				alignVertical: 0.5f,
+				scale: 1f);
+			spriteBatch.DrawStringAdvanced(
+				font: GameSettings.Assets.Fonts["default_font"],
+				text: $"TO START",
+				position: new Vector2(0, startTextHeight + startTextSpacing),
+				color: tutorialOffColor,
+				alignHorizontal: 0.5f,
+				alignVertical: 0.5f,
+				scale: smallTextScale);
 		}
 	}
 }

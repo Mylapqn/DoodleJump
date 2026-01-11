@@ -23,9 +23,21 @@ namespace DoodleJump.Rendering
 				Matrix.CreateScale(Zoom, Zoom, 1);
 
 			if (offsetCenter)
-				view *= Matrix.CreateTranslation(new Vector3(GameSettings.WindowWidth/ 2f, GameSettings.WindowHeight / 2f, 0));
+				view *= Matrix.CreateTranslation(new Vector3(GameSettings.WindowWidth / 2f, GameSettings.WindowHeight / 2f, 0));
 
 			return view;
+		}
+
+		public bool CanSeePoint(Vector2 point)
+		{
+			Matrix view = GetViewMatrix(true);
+
+			Vector2 screenPos = Vector2.Transform(point, view);
+
+			return screenPos.X >= 0 &&
+				   screenPos.Y >= 0 &&
+				   screenPos.X <= GameSettings.WindowWidth &&
+				   screenPos.Y <= GameSettings.WindowHeight;
 		}
 	}
 }

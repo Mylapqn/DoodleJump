@@ -4,6 +4,7 @@ using DoodleJump.Rendering;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,12 +20,16 @@ namespace DoodleJump.Hierarchy
 			Moving
 		}
 		public Platform topPlatform;
-		private Vector2 currentPosition = new Vector2();
+		private Vector2 currentPosition = new Vector2(0, -200);
 		public PlatformSpawner() { }
+		private int previousX = 0;
 
-		public List<Platform> SpawnPlaforms(float topY)
+		public List<Platform> SpawnPlatforms(float topY)
 		{
 			List<Platform> addedPlatforms = new();
+			int maxOffset = 350;
+			int platformWidth = 50;
+			int maxPlatformX = GameSettings.GameWidth / 2 - platformWidth;
 			while (currentPosition.Y > topY - 100)
 			{
 				PlatformType platformType = PlatformType.Normal;
@@ -47,30 +52,50 @@ namespace DoodleJump.Hierarchy
 
 				}
 				addedPlatforms.Add(newPlatform);
-				const float platformWidth = 50;
-				if (currentPosition.X < -GameSettings.GameWidth / 2 + platformWidth)
+				Debug.WriteLine($"Trying to put platform at {currentPosition.X}");
+				if (currentPosition.X < -maxPlatformX)
 				{
-					currentPosition.X = GameSettings.GameWidth / 2 - platformWidth;
+					Debug.WriteLine($"{currentPosition.X} is less than {-maxPlatformX}.");
+					Debug.WriteLine($"Comparing if Math.Abs({-maxPlatformX}- {previousX}) + {platformWidth * 2} is more than {maxOffset}.");
+					Debug.WriteLine($"So, comparing if {Math.Abs(-maxPlatformX - previousX) + platformWidth * 2} is more than {maxOffset}.");
+					if (Math.Abs(-maxPlatformX - previousX) + platformWidth * 2 > maxOffset)
+						Debug.WriteLine($"It is.");
+					else
+						Debug.WriteLine($"It is not.");
+					if (Math.Abs(-maxPlatformX - previousX) + platformWidth * 2 > maxOffset)
+						currentPosition.X = -maxPlatformX;
+					else
+						currentPosition.X = maxPlatformX;
 				}
-				if (currentPosition.X > GameSettings.GameWidth / 2 - platformWidth)
+				if (currentPosition.X > maxPlatformX)
 				{
-					currentPosition.X = -GameSettings.GameWidth / 2 + platformWidth;
+					Debug.WriteLine($"{currentPosition.X} is more than {-maxPlatformX}.");
+					Debug.WriteLine($"Comparing if Math.Abs({maxPlatformX}- {previousX}) + {platformWidth * 2} is more than {maxOffset}.");
+					Debug.WriteLine($"So, comparing if {Math.Abs(maxPlatformX - previousX) + platformWidth * 2} is more than {maxOffset}.");
+					if (Math.Abs(maxPlatformX - previousX) + platformWidth * 2 > maxOffset)
+						Debug.WriteLine($"It is.");
+					else
+						Debug.WriteLine($"It is not.");
+					if (Math.Abs(maxPlatformX - previousX) + platformWidth * 2 > maxOffset)
+						currentPosition.X = maxPlatformX;
+					else
+						currentPosition.X = -maxPlatformX;
 				}
+				Debug.WriteLine($"Final platform at {currentPosition.X}");
+				previousX = (int)currentPosition.X;
 				newPlatform.Position = currentPosition;
-
-				int maxOffset = 350;
 
 				switch (platformType)
 				{
 					case PlatformType.Bounce:
-						currentPosition.Y -= 100;
+						currentPosition.Y -= 280;
 						break;
 					case PlatformType.Moving:
 						currentPosition.Y -= 150;
 						break;
 					default:
 					case PlatformType.Normal:
-						currentPosition.Y -= 250 + GameSettings.Random.Next(50) - 25;
+						currentPosition.Y -= 250 + GameSettings.Random.Next(-25,26);
 						break;
 
 				}

@@ -18,7 +18,7 @@ namespace DoodleJump.Rendering
 
 		int frameCounter = 0;
 		float frameFloat = 0;
-		public float AnimationFPS { get; set; } = -12f;
+		public float AnimationFPS { get; set; } = 12f;
 
 		public SpriteSheetAnimation(
 			Texture2D texture,
@@ -46,6 +46,8 @@ namespace DoodleJump.Rendering
 			}
 
 			frameFloat += AnimationFPS * dt;
+
+			SpriteIndex = Math.Max(MinSpriteIndex, Math.Min(SpriteIndex, MaxSpriteIndex));
 
 			if (frameFloat >= 1)
 			{

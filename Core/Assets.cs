@@ -43,17 +43,24 @@ namespace DoodleJump.Core
 		}
 		public void LoadAllAssets()
 		{
-			LoadAsset<Texture2D>("textures/sprites", "fire_circles_100x100");
 			LoadAsset<Texture2D>("textures/sprites", "platform");
 			LoadAsset<Texture2D>("textures/sprites", "platform_bounce");
 			LoadAsset<Texture2D>("textures/sprites", "platform_moving");
 			LoadAsset<Texture2D>("textures/sprites", "cat_jump");
 			LoadAsset<Texture2D>("textures/sprites", "vignette");
+			LoadAsset<Texture2D>("textures/sprites", "pixel");
 			LoadAsset<SpriteFont>("fonts", "default_font");
 			LoadAsset<Texture2D>("textures/background", "fg_city");
 			LoadAsset<Texture2D>("textures/background", "bg_city_1");
 			LoadAsset<Texture2D>("textures/background", "bg_city_2");
 			LoadAsset<Texture2D>("textures/background", "bg_sky");
+			LoadAsset<SoundEffect>("sounds", "jump");
+			LoadAsset<SoundEffect>("sounds", "meow");
+			LoadAsset<SoundEffect>("sounds", "jump2");
+			LoadAsset<SoundEffect>("sounds", "brick1");
+			LoadAsset<SoundEffect>("sounds", "brick2");
+			LoadAsset<SoundEffect>("sounds", "success");
+			LoadAsset<SoundEffect>("sounds", "fail");
 		}
 	}
 }

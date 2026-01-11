@@ -38,10 +38,13 @@ namespace DoodleJump.Core
 			StartGame();
 		}
 
-		public void StartGame()
+		public void StartGame(bool showMenu = true)
 		{
 			GameSettings.Initialize();
-			GameSettings.MenuScreen.Initialize();
+			if (showMenu)
+				GameSettings.MenuScreen.Initialize();
+			else
+				GameSettings.PlayScreen.Initialize();
 		}
 
 		protected override void LoadContent()

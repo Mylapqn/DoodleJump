@@ -32,6 +32,36 @@ namespace DoodleJump.Core
 			// Capture current states
 			currentKeyboardState = Keyboard.GetState();
 			currentMouseState = Mouse.GetState();
+
+			// Capture typed text
+		}
+
+		public static char GetTypedChar()
+		{
+			Keys[] currentlyPressedKeys = currentKeyboardState.GetPressedKeys();
+			Keys[] previouslyPressedKeys = previousKeyboardState.GetPressedKeys();
+			Keys[] newKeys = currentlyPressedKeys.Except(previouslyPressedKeys).ToArray();
+			List<char> chars = new List<char>();
+			foreach (Keys key in newKeys)
+			{
+				char? c = KeyToChar(key, IsKeyDown(Keys.LeftShift));
+				if (c != null)
+					return c.Value;
+			}
+			return '\0';
+		}
+
+		private static char? KeyToChar(Keys key, bool shift)
+		{
+			if (key >= Keys.A && key <= Keys.Z)
+				return shift ? key.ToString()[0] : char.ToLower(key.ToString()[0]);
+			if (key >= Keys.D0 && key <= Keys.D9)
+				return shift ? ")!@#$%^&*("[key - Keys.D0] : (char)('0' + (key - Keys.D0));
+			if (key >= Keys.NumPad0 && key <= Keys.NumPad9)
+				return (char)('0' + (key - Keys.NumPad0));
+			if (key == Keys.Space)
+				return ' ';
+			return null; // add more keys if needed
 		}
 
 		// Keyboard helpers
