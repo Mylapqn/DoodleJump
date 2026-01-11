@@ -36,6 +36,7 @@ namespace DoodleJump.Core
 
 			base.Initialize();
 			StartGame();
+			Window.Title = "Rainbow Cat";
 		}
 
 		public void StartGame(bool showMenu = true)

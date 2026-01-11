@@ -43,8 +43,6 @@ namespace DoodleJump.Objects
 		//Sound
 		private const float SOUND_VOLUME_OTHER = 0.15f;
 		private const float SOUND_VOLUME_MEOW = 0.2f;
-		private const float SOUND_PITCH_UP = 0.2f;
-		private const float SOUND_PITCH_DOWN = -0.2f;
 		private const float POPUP_LIFETIME = 1f;
 
 		//Rotation
@@ -53,7 +51,6 @@ namespace DoodleJump.Objects
 
 		//Camera & bounds
 		private const float DEATH_CAMERA_BUFFER = 100f;
-		private const float CAMERA_LEAD_OFFSET = 300f;
 
 		//Intro animation
 		private const float INTRO_MOVE_INPUT = 1.1f;
@@ -232,14 +229,8 @@ namespace DoodleJump.Objects
 
 			if (Position.Y > GameSettings.PlayScreen.Camera.Position.Y + GameSettings.WindowHeight / 2f / GameSettings.PlayScreen.Camera.Zoom + DEATH_CAMERA_BUFFER)
 			{
+				//Die
 				GameSettings.EndScreen.Initialize();
-			}
-			else if (Position.Y < GameSettings.PlayScreen.Camera.Position.Y - GameSettings.WindowHeight / 2f + CAMERA_LEAD_OFFSET)
-			{
-				GameSettings.PlayScreen.Camera.Position =
-					new Vector2(
-						GameSettings.PlayScreen.Camera.Position.X,
-						Position.Y + GameSettings.WindowHeight / 2f - CAMERA_LEAD_OFFSET);
 			}
 		}
 
