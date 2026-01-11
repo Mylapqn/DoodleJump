@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Media;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -17,6 +18,19 @@ namespace DoodleJump.Hierarchy
 {
 	public class EndScreen : Screen
 	{
+		//UI
+		const int TEXT_SPACING = 50;
+		const float TEXT_SCALE = .4f;
+
+		//Leaderboard UI
+		const float LEADERBOARD_TEXT_SCALE = 0.3f;
+		const int LEADERBOARD_TEXT_SPACING = 30;
+		const int LEADERBOARD_MAX_ENTRIES = 10;
+		const int LEADERBOARD_EDGE_PADDING = 200;
+		private const int NAME_MAX_LENGTH = 20;
+		private const int MIN_SCORE = 10;
+
+
 		List<HighScore> highScores;
 		float elapsedTime = 0f;
 		bool isNewHighScore = false;
@@ -24,6 +38,7 @@ namespace DoodleJump.Hierarchy
 		string playerName = "";
 		public override void Initialize()
 		{
+			MediaPlayer.Stop();
 			GameSettings.ActiveScreen = this;
 			GameSettings.TimeScale = 1f;
 			highScores = GameSettings.SaveSystem.LoadHighScores();
@@ -33,11 +48,15 @@ namespace DoodleJump.Hierarchy
 				enteringName = true;
 			}
 		}
+		public override void Deinitialize()
+		{
+			MediaPlayer.Stop();
+		}
 		private bool IsNewHighScore(int score)
 		{
-			if (score == 0)
+			if (score <= MIN_SCORE)
 				return false;
-			if (highScores.Count < 10)
+			if (highScores.Count < LEADERBOARD_MAX_ENTRIES)
 				return true;
 			return score > highScores[highScores.Count - 1].Score;
 		}
@@ -60,7 +79,7 @@ namespace DoodleJump.Hierarchy
 			if (enteringName)
 			{
 				char typedChar = Input.GetTypedChar();
-				if (typedChar != '\0' && playerName.Length < 20)
+				if (typedChar != '\0' && playerName.Length < NAME_MAX_LENGTH)
 				{
 					playerName += typedChar;
 				}
@@ -71,7 +90,7 @@ namespace DoodleJump.Hierarchy
 				if (Input.IsKeyPressed(Keys.Enter) && playerName.Length > 0)
 				{
 					enteringName = false;
-					AddHighScore(new HighScore(playerName, (int)GameSettings.ScoreDecimal, (int)GameSettings.MaxHeightReached));
+					AddHighScore(new HighScore(playerName, (int)GameSettings.ScoreDecimal, (int)GameSettings.MaxHeightReached, DateOnly.FromDateTime(DateTime.Now)));
 				}
 			}
 			if (Input.IsKeyReleased(Keys.Space) && !enteringName)
@@ -87,15 +106,13 @@ namespace DoodleJump.Hierarchy
 		public override void Draw(SpriteBatch spriteBatch, PolygonDrawer polygonDrawer)
 		{
 			spriteBatch.GraphicsDevice.Clear(Color.Black);
-			int textSpacing = 50;
-			float textScale = 0.4f;
-			int initialY = GameSettings.WindowHeight / 6;
+			int TopPadding = GameSettings.WindowHeight / 6;
 			spriteBatch.Begin(samplerState: SamplerState.PointClamp);
 			polygonDrawer.Begin();
 			spriteBatch.DrawStringAdvanced(
 				font: GameSettings.Assets.Fonts["default_font"],
 				text: "GAME OVER",
-				position: new Vector2(GameSettings.WindowWidth / 2, initialY),
+				position: new Vector2(GameSettings.WindowWidth / 2, TopPadding),
 				alignHorizontal: 0.5f,
 				alignVertical: 0.5f,
 				color: Color.White,
@@ -104,36 +121,36 @@ namespace DoodleJump.Hierarchy
 			spriteBatch.DrawStringAdvanced(
 				font: GameSettings.Assets.Fonts["default_font"],
 				text: $"SCORE: {(int)GameSettings.ScoreDecimal}",
-				position: new Vector2(GameSettings.WindowWidth / 2, initialY + textSpacing * 2),
+				position: new Vector2(GameSettings.WindowWidth / 2, TopPadding + TEXT_SPACING * 2),
 				alignHorizontal: 0.5f,
 				alignVertical: 0.5f,
 				color: Color.White,
-				scale: textScale
+				scale: TEXT_SCALE
 				);
 			spriteBatch.DrawStringAdvanced(
 				font: GameSettings.Assets.Fonts["default_font"],
-				text: $"REACHED HEIGHT: {(int)GameSettings.MaxHeightReached / 100} m",
-				position: new Vector2(GameSettings.WindowWidth / 2, initialY + textSpacing * 3),
+				text: $"REACHED HEIGHT: {(int)GameSettings.MaxHeightReached / GameSettings.HEIGHT_PER_METER} m",
+				position: new Vector2(GameSettings.WindowWidth / 2, TopPadding + TEXT_SPACING * 3),
 				alignHorizontal: 0.5f,
 				alignVertical: 0.5f,
 				color: Color.DarkGray,
-				scale: textScale
+				scale: TEXT_SCALE
 				);
 			if (isNewHighScore)
 			{
-				DrawHighScore(spriteBatch, textSpacing, textScale, initialY + textSpacing * 4);
+				DrawHighScore(spriteBatch, TEXT_SPACING, TEXT_SCALE, TopPadding + TEXT_SPACING * 4);
 			}
 			spriteBatch.DrawStringAdvanced(
 				font: GameSettings.Assets.Fonts["default_font"],
 				text: $"LEADERBOARD",
-				position: new Vector2(GameSettings.WindowWidth / 2, initialY + textSpacing * 8),
+				position: new Vector2(GameSettings.WindowWidth / 2, TopPadding + TEXT_SPACING * 8),
 				alignHorizontal: 0.5f,
 				alignVertical: 0.5f,
 				color: Color.White,
-				scale: textScale
+				scale: TEXT_SCALE
 				);
 
-			DrawLeaderboard(spriteBatch, initialY + textSpacing * 9);
+			DrawLeaderboard(spriteBatch, TopPadding + TEXT_SPACING * 9);
 
 			spriteBatch.DrawStringAdvanced(
 				font: GameSettings.Assets.Fonts["default_font"],
@@ -142,16 +159,16 @@ namespace DoodleJump.Hierarchy
 				alignHorizontal: 0.5f,
 				alignVertical: 0.5f,
 				color: Color.DarkGray,
-				scale: .3f
+				scale: LEADERBOARD_TEXT_SCALE
 			);
 			spriteBatch.DrawStringAdvanced(
 				font: GameSettings.Assets.Fonts["default_font"],
 				text: "Press ESC to close the game",
-				position: new Vector2(GameSettings.WindowWidth / 2, GameSettings.WindowHeight - 200 + textSpacing * 1),
+				position: new Vector2(GameSettings.WindowWidth / 2, GameSettings.WindowHeight - 200 + TEXT_SPACING * 1),
 				alignHorizontal: 0.5f,
 				alignVertical: 0.5f,
 				color: Color.DarkGray,
-				scale: .3f
+				scale: LEADERBOARD_TEXT_SCALE
 				);
 			spriteBatch.End();
 			polygonDrawer.End();
@@ -171,7 +188,6 @@ namespace DoodleJump.Hierarchy
 				scale: textScale);
 			if (enteringName)
 			{
-				textScale = 0.5f;
 				float currentX = 200;
 				currentX += spriteBatch.DrawStringAdvanced(
 					font: GameSettings.Assets.Fonts["default_font"],
@@ -207,9 +223,7 @@ namespace DoodleJump.Hierarchy
 		private void DrawLeaderboard(SpriteBatch spriteBatch, int startY)
 		{
 			int currentY = startY;
-			float leaderboardScale = 0.3f;
-			int leaderboardSpacing = 30;
-			for (int i = 0; i < Math.Min(10, highScores.Count); i++)
+			for (int i = 0; i < Math.Min(LEADERBOARD_MAX_ENTRIES, highScores.Count); i++)
 			{
 				HighScore hs = highScores[i];
 				Color color = Color.Gray;
@@ -220,19 +234,27 @@ namespace DoodleJump.Hierarchy
 				spriteBatch.DrawStringAdvanced(
 					font: GameSettings.Assets.Fonts["default_font"],
 					text: $"{i + 1}. {hs.PlayerName}",
-					position: new Vector2(200, currentY),
+					position: new Vector2(LEADERBOARD_EDGE_PADDING, currentY),
 					color: color,
-					scale: leaderboardScale
+					scale: LEADERBOARD_TEXT_SCALE
 					);
 				spriteBatch.DrawStringAdvanced(
 					font: GameSettings.Assets.Fonts["default_font"],
 					text: $"{hs.Score}",
-					position: new Vector2(GameSettings.WindowWidth - 200, currentY),
+					position: new Vector2(GameSettings.WindowWidth / 2, currentY),
+					color: color,
+					alignHorizontal: 0.0f,
+					scale: LEADERBOARD_TEXT_SCALE
+					);
+				spriteBatch.DrawStringAdvanced(
+					font: GameSettings.Assets.Fonts["default_font"],
+					text: $"{hs.Date.ToString("yyyy-MM-dd")}",
+					position: new Vector2(GameSettings.WindowWidth - LEADERBOARD_EDGE_PADDING, currentY),
 					color: color,
 					alignHorizontal: 1f,
-					scale: leaderboardScale
+					scale: LEADERBOARD_TEXT_SCALE
 					);
-				currentY += leaderboardSpacing;
+				currentY += LEADERBOARD_TEXT_SPACING;
 			}
 		}
 	}

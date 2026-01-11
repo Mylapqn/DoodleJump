@@ -1,4 +1,5 @@
-﻿using DoodleJump.Hierarchy;
+﻿using DoodleJump.Core;
+using DoodleJump.Hierarchy;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -15,7 +16,7 @@ namespace DoodleJump.Rendering
 		Vector2 initialPosition;
 		public BackgroundLayer(SpriteSheet visualization, float depth, Vector2 initialPosition) : base(visualization)
 		{
-			this.Visualization.Scale = 4;
+			this.Visualization.Scale = GameSettings.PIXEL_SCALE;
 			this.Visualization.Origin = new Vector2(.5f, 1);
 			this.initialPosition = initialPosition;
 			this.depth = depth;

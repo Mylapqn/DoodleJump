@@ -22,11 +22,12 @@ namespace DoodleJump.Hierarchy
 			set => Visualization.Position = value;
 		}
 
-		
+
 
 		public Point Size => Visualization.Size;
 
 		public bool IsActive { get; set; } = true;
+		public bool IsVisible { get; set; } = true;
 
 		public Vector2 Velocity { get; set; } = Vector2.Zero;
 
@@ -84,10 +85,10 @@ namespace DoodleJump.Hierarchy
 
 		public virtual void Draw(SpriteBatch spriteBatch, PolygonDrawer polygonDrawer)
 		{
-			if (!IsActive)
+			if (!IsActive || !IsVisible)
 				return;
 
-			Visualization.Draw(spriteBatch);
+				Visualization.Draw(spriteBatch);
 			if (GameSettings.DebugDraw)
 			{
 				Rectangle hitboxUnrotated = Visualization.HitBoxRectangle;

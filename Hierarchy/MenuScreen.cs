@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Media;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -24,7 +25,12 @@ namespace DoodleJump.Hierarchy
 			GameSettings.ActiveScreen = this;
 			totalTime = 0f;
 			cat = new SpriteSheetAnimation(GameSettings.Assets.Textures["cat_jump"], 2, 8, 3, 10, 11);
-			cat.Scale = 8;
+			cat.Scale = GameSettings.PIXEL_SCALE * 2;
+		}
+
+		public override void Deinitialize()
+		{
+			MediaPlayer.Stop();
 		}
 
 		public override void LoadContent(ContentManager content)
@@ -36,7 +42,7 @@ namespace DoodleJump.Hierarchy
 		{
 			totalTime += dt;
 			cat.Update(dt);
-			if (Input.IsMouseButtonReleased(Input.MouseButton.Left) || Input.IsKeyReleased(Keys.Space))
+			if (Input.IsKeyReleased(Keys.Space))
 			{
 				GameSettings.PlayScreen.Initialize();
 				GameSettings.Assets.Sounds["success"].Play(.2f, 0, 0f);

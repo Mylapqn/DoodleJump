@@ -13,9 +13,13 @@ namespace DoodleJump.Objects
 {
 	public class Platform : GameObject
 	{
+		public const float JUMP_OFFSET_DURATION = 0.5f;
+		private const int OFFSET_INTENSITY_MULTIPLIER = 30;
+		private const int OFFSET_DOWN_SPEED = 30;
+
 		public float BounceForce;
 		public float jumpOffsetTimer = 0;
-		public const float JumpOffsetDuration = 0.5f;
+
 		public Vector2 OffsetPosition
 		{
 			get; set;
@@ -26,13 +30,13 @@ namespace DoodleJump.Objects
 		} = Vector2.Zero;
 		public Platform(SpriteSheet visualization) : base(visualization)
 		{
-			this.Visualization.Scale = 4;
+			this.Visualization.Scale = GameSettings.PIXEL_SCALE;
 			this.BounceForce = 21f;
 		}
 		public virtual void Bounce(Player player)
 		{
-			jumpOffsetTimer = JumpOffsetDuration;
-			OffsetDirection = Vector2.Normalize(new Vector2(player.Velocity.X, -30));
+			jumpOffsetTimer = JUMP_OFFSET_DURATION;
+			OffsetDirection = Vector2.Normalize(new Vector2(player.Velocity.X, -OFFSET_DOWN_SPEED));
 			PlayBounceSound();
 		}
 		internal virtual void PlayBounceSound()
@@ -40,15 +44,15 @@ namespace DoodleJump.Objects
 			float pitch = (GameSettings.Random.NextSingle() - .5f) * .5f + .0f;
 			int soundIndex = GameSettings.Random.Next(0, 2);
 			string soundName = new string[] { "brick1", "brick2" }[soundIndex];
-			GameSettings.Assets.Sounds[soundName].Play(.2f, pitch, 0f);
+			GameSettings.Assets.Sounds[soundName].Play(.6f, pitch, 0f);
 		}
 		public override void Update(float dt)
 		{
 			if (jumpOffsetTimer > 0)
 			{
 				jumpOffsetTimer -= dt;
-				float progress = 1 - (jumpOffsetTimer / JumpOffsetDuration);
-				float offsetIntensity = -(float)(Math.Sin(progress * Math.PI) * 30);
+				float progress = 1 - (jumpOffsetTimer / JUMP_OFFSET_DURATION);
+				float offsetIntensity = -(float)(Math.Sin(progress * Math.PI) * OFFSET_INTENSITY_MULTIPLIER);
 				OffsetPosition = OffsetDirection * offsetIntensity;
 			}
 			else

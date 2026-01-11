@@ -10,7 +10,9 @@ namespace DoodleJump.Core
 	public class SaveSystem
 	{
 		public string SaveFilePath { get; private set; }
-		const char Separator = ';';
+		const char CSV_SPERATAOR = ';';
+		private const string DATE_FORMAT = "yyyy-MM-dd";
+
 		public SaveSystem(string saveFilePath)
 		{
 			SaveFilePath = saveFilePath;
@@ -35,10 +37,10 @@ namespace DoodleJump.Core
 		}
 		private bool TryParseHighScore(string line, out HighScore highScore)
 		{
-			string[] parts = line.Split(Separator);
-			if (parts.Length == 3 && int.TryParse(parts[1], out int score) && int.TryParse(parts[2], out int height))
+			string[] parts = line.Split(CSV_SPERATAOR);
+			if (parts.Length == 4 && int.TryParse(parts[1], out int score) && int.TryParse(parts[2], out int height) && DateOnly.TryParseExact(parts[3], DATE_FORMAT, out DateOnly date))
 			{
-				highScore = new HighScore(parts[0], score, height);
+				highScore = new HighScore(parts[0], score, height, date);
 				return true;
 			}
 			else
@@ -50,7 +52,7 @@ namespace DoodleJump.Core
 		}
 		public void SaveHighScores(List<HighScore> highScores)
 		{
-			string[] lines = highScores.OrderByDescending(hs => hs.Score).Take(10).Select(hs => $"{hs.PlayerName}{Separator}{hs.Score}{Separator}{hs.ReachedHeight}").ToArray();
+			string[] lines = highScores.OrderByDescending(hs => hs.Score).Take(10).Select(hs => $"{hs.PlayerName}{CSV_SPERATAOR}{hs.Score}{CSV_SPERATAOR}{hs.ReachedHeight}{CSV_SPERATAOR}{hs.Date.ToString(DATE_FORMAT)}").ToArray();
 			File.WriteAllLines(SaveFilePath, lines);
 		}
 	}

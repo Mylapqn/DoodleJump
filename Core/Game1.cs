@@ -49,7 +49,7 @@ namespace DoodleJump.Core
 
 		protected override void LoadContent()
 		{
-			GameSettings.Assets = new Assets();
+			GameSettings.Assets = new Assets(Content);
 			_spriteBatch = new SpriteBatch(GraphicsDevice);
 			_polygonDrawer = new PolygonDrawer();
 			_polygonDrawer.Initialize(GraphicsDevice, new BasicEffect(GraphicsDevice)

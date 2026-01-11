@@ -11,11 +11,13 @@ namespace DoodleJump.Core
 		public string PlayerName { get; set; }
 		public int Score { get; set; }
 		public int ReachedHeight { get; set; }
-		public HighScore(string playerName, int score, int reachedHeight)
+		public DateOnly Date { get; set; }
+		public HighScore(string playerName, int score, int reachedHeight, DateOnly date)
 		{
 			PlayerName = playerName;
 			Score = score;
 			ReachedHeight = reachedHeight;
+			Date = date;
 		}
 	}
 }

@@ -15,6 +15,7 @@ namespace DoodleJump.Hierarchy
 		protected Screen() { }
 
 		public abstract void Initialize();
+		public abstract void Deinitialize();
 
 		public abstract void LoadContent(ContentManager content);
 

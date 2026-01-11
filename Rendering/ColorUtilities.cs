@@ -21,7 +21,7 @@ namespace DoodleJump.Rendering
 		}
 		public static Color StreakColor(int streak)
 		{
-			if (streak >= 60)
+			if (streak >= 50)
 			{
 				return ColorUtilities.ColorFromHex(0xFF006FFF);
 			}

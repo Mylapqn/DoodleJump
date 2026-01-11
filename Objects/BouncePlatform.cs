@@ -11,7 +11,7 @@ namespace DoodleJump.Objects
 		}
 		internal override void PlayBounceSound()
 		{
-			GameSettings.Assets.Sounds["jump"].Play(.3f, .5f, 0f);	
+			GameSettings.Assets.Sounds["jump"].Play(.6f, .8f, 0f);	
 			base.PlayBounceSound();
 		}
 	}
