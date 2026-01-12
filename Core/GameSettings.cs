@@ -12,7 +12,7 @@ namespace DoodleJump.Core
 		public const int PIXEL_SCALE = 4;
 		public const int HEIGHT_PER_METER = 100;
 		public static int WindowWidth { get; set; } = 880;
-		public static int WindowHeight { get; set; } = 1440;
+		public static int WindowHeight { get; set; } = 1360;
 		public static int GameWidth { get; set; } = WindowWidth;
 		/*
 		public static int WindowWidth { get; set; } = 800;
