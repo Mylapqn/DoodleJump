@@ -7,8 +7,8 @@ namespace DoodleJump.Objects
 {
 	internal class MovingPlatform : Platform
 	{
-		private float moveSpeed = 250f;
-		private float edgePadding = 100f;
+		protected float moveSpeed = 250f;
+		protected float edgePadding = 100f;
 		public MovingPlatform(SpriteSheet visualization) : base(visualization)
 		{
 		}

@@ -16,18 +16,19 @@ namespace DoodleJump.Rendering
 		public float Rotation { get; set; } = 0f;
 		public Camera() { }
 
-		public Matrix GetViewMatrix(bool offsetCenter)
+		public Matrix GetViewMatrix(bool offsetScreenCenter)
 		{
 			Matrix view = Matrix.CreateTranslation(new Vector3(-Position, 0)) *
 				Matrix.CreateRotationZ(Rotation) *
 				Matrix.CreateScale(Zoom, Zoom, 1);
 
-			if (offsetCenter)
+			if (offsetScreenCenter)
 				view *= Matrix.CreateTranslation(new Vector3(GameSettings.WindowWidth / 2f, GameSettings.WindowHeight / 2f, 0));
 
 			return view;
 		}
 
+		//Check if point is visible by camera
 		public bool CanSeePoint(Vector2 point)
 		{
 			Matrix view = GetViewMatrix(true);

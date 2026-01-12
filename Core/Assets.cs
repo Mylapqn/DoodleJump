@@ -52,7 +52,9 @@ namespace DoodleJump.Core
 		}
 		public void LoadAllAssets()
 		{
+			LoadAsset<Texture2D>("textures/sprites", "bomb");
 			LoadAsset<Texture2D>("textures/sprites", "platform");
+			LoadAsset<Texture2D>("textures/sprites", "platform_enemy");
 			LoadAsset<Texture2D>("textures/sprites", "platform_ac");
 			LoadAsset<Texture2D>("textures/sprites", "platform_bounce");
 			LoadAsset<Texture2D>("textures/sprites", "platform_moving");

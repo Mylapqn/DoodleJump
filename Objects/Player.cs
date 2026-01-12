@@ -23,7 +23,8 @@ namespace DoodleJump.Objects
 
 		//Collision
 		private const float COLLISION_PREDICTION_SPEED = 100f;
-		private const int COLLISION_PIXEL_TOLERANCE = 1;
+		private const int COLLISION_PIXEL_TOLERANCE_UP = 30;
+		private const int COLLISION_PIXEL_TOLERANCE_DOWN = 1;
 
 		//Movement & physics
 		private const float AIR_SPEED_X = 8f;
@@ -55,15 +56,18 @@ namespace DoodleJump.Objects
 		//Intro animation
 		private const float INTRO_MOVE_INPUT = 1.1f;
 		private const float INTRO_CANCEL_X = -40f;
+		private const float WALK_VELOCITY_THRESHOLD = 0.1f;
 
+		//State
 		private bool grounded = false;
-		private Platform standingOn;
+		public Platform standingOn;
 		private Platform lastPlatform;
 		public float timeSinceJump = 0f;
 		private LineTrail trail = new LineTrail(color: Color.OrangeRed, maxPoints: TRAIL_MAX_POINTS);
 		public bool walking = true;
 		private bool introAnimation = true;
 		public bool poweredUp = false;
+		public bool willDie { get; private set; } = false;
 		private TextPopupManager SceneTextPopupManager { get; set; }
 
 		public Player(SpriteSheetAnimation anim, TextPopupManager textPopupManager)
@@ -76,6 +80,7 @@ namespace DoodleJump.Objects
 			SceneTextPopupManager = textPopupManager;
 		}
 
+		//Check individual platform collision
 		public bool IsStandingOn(GameObject obj, float dt)
 		{
 			Rectangle hb1 = Visualization.HitBoxRectangle;
@@ -86,15 +91,16 @@ namespace DoodleJump.Objects
 				hb1.Bottom + Velocity.Y * dt * COLLISION_PREDICTION_SPEED >= hb2.Top;
 
 			bool isCurrentlyOn =
-				hb1.Bottom - COLLISION_PIXEL_TOLERANCE <= hb2.Top &&
-				hb1.Bottom + COLLISION_PIXEL_TOLERANCE >= hb2.Top;
+				hb1.Bottom - COLLISION_PIXEL_TOLERANCE_UP <= hb2.Top &&
+				hb1.Bottom + COLLISION_PIXEL_TOLERANCE_DOWN >= hb2.Top;
 
 			bool leftRightOverlap = hb1.Right > hb2.Left && hb1.Left < hb2.Right;
 
 			return leftRightOverlap && (isCurrentlyOn || willFallThrough);
 		}
 
-		public void CheckPlatformCollisions(IEnumerable<Platform> platforms, float dt)
+		//Called by PlayScreen
+		public Platform CheckPlatformToBounce(IEnumerable<Platform> platforms, float dt)
 		{
 			foreach (var platform in platforms)
 			{
@@ -102,11 +108,12 @@ namespace DoodleJump.Objects
 				{
 					standingOn = platform;
 					grounded = true;
-					return;
+					return platform;
 				}
 			}
 			grounded = false;
 			standingOn = null;
+			return null;
 		}
 
 		public override void Update(float dt)
@@ -118,8 +125,10 @@ namespace DoodleJump.Objects
 			float friction = AIR_FRICTION;
 			float gravity = poweredUp ? POWERUP_GRAVITY : NORMAL_GRAVITY;
 
+			//Check if touching a platform
 			if (grounded)
 			{
+				//Special state at start of game
 				if (walking)
 				{
 					speedX = WALK_SPEED_X;
@@ -129,7 +138,9 @@ namespace DoodleJump.Objects
 					vel.Y = 0f;
 
 					var anim = Visualization as SpriteSheetAnimation;
-					if (MathF.Abs(vel.X) <= 0.1f)
+
+					//Walking animation from horizontal velocity
+					if (MathF.Abs(vel.X) <= WALK_VELOCITY_THRESHOLD)
 					{
 						anim.IdleSpriteIndex = SPRITE_IDLE_INDEX;
 						anim.IsAnimationStopped = true;
@@ -140,6 +151,7 @@ namespace DoodleJump.Objects
 						anim.IsAnimationStopped = false;
 					}
 
+					//Exit walking state
 					if (Input.IsKeyDown(Keys.Space))
 					{
 						walking = false;
@@ -148,6 +160,7 @@ namespace DoodleJump.Objects
 						GameSettings.Assets.Sounds["meow"].Play(SOUND_VOLUME_MEOW, 0, 0f);
 					}
 				}
+				//Touching platform during normal gameplay
 				else
 				{
 					float bounceMultiplier = poweredUp ? POWERUP_BOUNCE_MULTIPLIER : 1f;
@@ -155,11 +168,14 @@ namespace DoodleJump.Objects
 					standingOn.Bounce(this);
 					timeSinceJump = 0f;
 
+					//Streak system
+					//Check if touching new platform
 					if (lastPlatform != null && lastPlatform != standingOn)
 					{
 						GameSettings.PlatformStreak++;
 						GameSettings.MaxPlatformStreak = Math.Max(GameSettings.MaxPlatformStreak, GameSettings.PlatformStreak);
 
+						//Give powerup on threshold
 						if (GameSettings.PlatformStreak % STREAK_POWERUP_THRESHOLD == 0)
 						{
 							GameSettings.Assets.Sounds["meow"].Play(SOUND_VOLUME_MEOW, 0, 0f);
@@ -173,11 +189,13 @@ namespace DoodleJump.Objects
 									ColorUtilities.StreakColor(GameSettings.PlatformStreak),
 									POPUP_LIFETIME));
 						}
+						//Remove powerup after one jump
 						else
 						{
 							poweredUp = false;
 						}
 					}
+					//Reset streak if same platform
 					else
 					{
 						if (GameSettings.PlatformStreak > 0)
@@ -198,43 +216,64 @@ namespace DoodleJump.Objects
 					lastPlatform = standingOn;
 				}
 			}
+			//Apply gravity when not grounded
 			else
 			{
 				vel.Y += dt * gravity;
 				timeSinceJump += dt;
+
 				SetRotationFromVelocity();
 			}
 
+			//Apply temp velocity and position
 			Velocity = vel;
+			Position = pos;
 
+			//Input
 			float horizontalInput = ProcessInput();
-			DoHorizontalMovement(dt, horizontalInput, speedX, friction);
+			ApplyHorizontalInput(dt, horizontalInput, speedX, friction);
 
+			//Color from streak or powerup
 			Color color = poweredUp
 				? ColorUtilities.HSV(GameSettings.ElapsedGameTime % 1f, 1f, 1f)
 				: ColorUtilities.StreakColor(GameSettings.PlatformStreak);
 
 			Visualization.Color = color;
-			Position = pos;
-			MoveGameObject(dt);
 
+
+			//Base method updates position and visualization
+			base.Update(dt);
+
+
+			//Calculations dependent on updated position:
+
+			//Wrap edge position
 			bool edgeWrapped = DoEdgeWrap();
 
-			if (-Position.Y > GameSettings.MaxHeightReached)
-				GameSettings.MaxHeightReached = -Position.Y;
-
-			Visualization.Update(dt);
+			//Update trail
 			if (!walking)
 				trail.Update(Position, color, edgeWrapped);
 
-			if (Position.Y > GameSettings.PlayScreen.Camera.Position.Y + GameSettings.WindowHeight / 2f / GameSettings.PlayScreen.Camera.Zoom + DEATH_CAMERA_BUFFER)
+			//Update max height reached
+			if (-Position.Y > GameSettings.MaxHeightReached)
+				GameSettings.MaxHeightReached = -Position.Y;
+
+			//Check if player fell below camera view
+			bool isBelowScreen = (Position.Y > GameSettings.PlayScreen.Camera.Position.Y + GameSettings.WindowHeight / 2f / GameSettings.PlayScreen.Camera.Zoom + DEATH_CAMERA_BUFFER);
+
+			//Check death condition
+			if (isBelowScreen)
 			{
-				//Die
-				GameSettings.EndScreen.Initialize();
+				Die();
 			}
 		}
 
-		private void DoHorizontalMovement(float dt, float horizontalInput, float speedX, float friction)
+		public void Die()
+		{
+			willDie = true;
+		}
+
+		private void ApplyHorizontalInput(float dt, float horizontalInput, float speedX, float friction)
 		{
 			Vector2 vel = Velocity;
 			if (horizontalInput != 0)
@@ -251,6 +290,7 @@ namespace DoodleJump.Objects
 			base.Draw(spriteBatch, polygonDrawer);
 		}
 
+		//Set rotation and sprite based on velocity direction
 		private void SetRotationFromVelocity()
 		{
 			float rotation = MathF.Atan2(Velocity.X, -Velocity.Y);
@@ -277,6 +317,7 @@ namespace DoodleJump.Objects
 			Visualization.Rotation = rotation;
 		}
 
+		//Wrap player position when going off screen edges
 		private bool DoEdgeWrap()
 		{
 			bool wrapped = false;

@@ -10,6 +10,7 @@ namespace DoodleJump.Rendering
 {
 	internal static class SpriteBatchExtension
 	{
+		//Custom DrawString method with advanced alignment, scaling, and rotation options
 		public static Vector2 DrawStringAdvanced(this SpriteBatch spriteBatch, SpriteFont font, string text, Vector2 position, Color color = new Color(), float alignHorizontal = 0, float alignVertical = 0, float scale = 1, float rotation = 0)
 		{
 			Vector2 pivot = new();

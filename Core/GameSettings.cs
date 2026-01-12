@@ -11,6 +11,7 @@ namespace DoodleJump.Core
 	{
 		public const int PIXEL_SCALE = 4;
 		public const int HEIGHT_PER_METER = 100;
+
 		public static int WindowWidth { get; set; } = 880;
 		public static int WindowHeight { get; set; } = 1360;
 		public static int GameWidth { get; set; } = WindowWidth;
@@ -19,6 +20,9 @@ namespace DoodleJump.Core
 		public static int WindowHeight { get; set; } = 1000;
 		public static int GameWidth { get; set; } = 1000;
 		*/
+
+		public static int BombCount { get; set; } = 0;
+		public static int BounceCount { get; set; } = 0;
 
 		public static float TimeScale { get; set; } = 1.0f;
 		public static float ScoreDecimal { get; set; } = 0;
@@ -62,6 +66,9 @@ namespace DoodleJump.Core
 			MaxHeightReached = 0;
 			Random = new Random();
 			ElapsedGameTime = 0f;
+
+			BounceCount = 0;
+			BombCount = 0;
 		}
 		public static void SetActiveScreen(Screen screen)
 		{

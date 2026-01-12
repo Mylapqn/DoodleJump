@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace DoodleJump.Hierarchy
 {
-	internal class MenuScreen : Screen
+	internal class MenuScreen : BaseScreen
 	{
 		private float totalTime = 0f;
 		private SpriteSheetAnimation cat;
@@ -47,6 +47,8 @@ namespace DoodleJump.Hierarchy
 				GameSettings.PlayScreen.Initialize();
 				GameSettings.Assets.Sounds["success"].Play(.2f, 0, 0f);
 			}
+
+			base.Update(dt);
 		}
 
 		public override void Draw(SpriteBatch spriteBatch, PolygonDrawer polygonDrawer)
@@ -113,7 +115,7 @@ namespace DoodleJump.Hierarchy
 			cat.Draw(spriteBatch);
 			spriteBatch.End();
 
-
+			base.Draw(spriteBatch, polygonDrawer);
 		}
 	}
 }

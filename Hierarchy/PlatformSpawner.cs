@@ -26,12 +26,15 @@ namespace DoodleJump.Hierarchy
 		private const float CHANCE_BOUNCE = 0.1f;
 		private const float CHANCE_MOVING = 0.1f;
 		private const float CHANCE_SIDESTEP = 0.05f;
+		private const float CHANCE_ENEMY = 0.1f;
+		private const float ENEMY_SPACING = .6f;
 
 		public enum PlatformType
 		{
 			Normal,
 			Bounce,
-			Moving
+			Moving,
+			Enemy
 		}
 		public Platform topPlatform;
 		private Vector2 nextPlatformPosition;
@@ -70,6 +73,19 @@ namespace DoodleJump.Hierarchy
 					Vector2 sideStepPosition = new Vector2(previousPosition.X + sideStepOffset, previousPosition.Y);
 					sideStepPosition = WrapAroundPositionX(sideStepPosition, previousPosition.X, MIN_SIDESTEP_DISTANCE * 2);
 					Platform sidePlatform = SpawnNewPlatform(addedPlatforms, PlatformType.Bounce, sideStepPosition);
+				}
+
+				bool enemy = (Probability(CHANCE_ENEMY)) && platformType != PlatformType.Moving && previousPosition.Y < -BUILDING_HEIGHT;
+				if (enemy)
+				{
+					int sideStepOffset = RandomOffset();
+					if (MathF.Abs(sideStepOffset) <= MIN_SIDESTEP_DISTANCE)
+					{
+						sideStepOffset = MathF.Sign(sideStepOffset) * (MIN_SIDESTEP_DISTANCE + 1);
+					}
+					Vector2 enemyPosition = new Vector2(previousPosition.X, previousPosition.Y - PLATFORM_SPACING * ENEMY_SPACING);
+					enemyPosition = WrapAroundPositionX(enemyPosition, previousPosition.X, MIN_SIDESTEP_DISTANCE * 2);
+					Platform sidePlatform = SpawnNewPlatform(addedPlatforms, PlatformType.Enemy, enemyPosition);
 				}
 
 				switch (platformType)
@@ -133,6 +149,10 @@ namespace DoodleJump.Hierarchy
 						texture = GameSettings.Assets.Textures["platform_moving"];
 					}
 					newPlatform = new MovingPlatform(new SpriteSheet(texture));
+					break;
+				case PlatformType.Enemy:
+					texture = GameSettings.Assets.Textures["platform_enemy"];
+					newPlatform = new EnemyPlatform(new SpriteSheet(texture));
 					break;
 				default:
 				case PlatformType.Normal:

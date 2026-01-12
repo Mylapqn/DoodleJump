@@ -35,7 +35,6 @@ namespace DoodleJump.Hierarchy
 		{
 			get
 			{
-				return false;
 				//TODO temp fix
 				Rectangle hb = Visualization.HitBoxRectangle;
 				int w = GameSettings.WindowWidth;
@@ -71,9 +70,6 @@ namespace DoodleJump.Hierarchy
 				return;
 
 			MoveGameObject(dt);
-
-			if (IsOutOfBounds)
-				IsActive = false;
 
 			Visualization.Update(dt);
 		}

@@ -17,7 +17,7 @@ using static System.Formats.Asn1.AsnWriter;
 
 namespace DoodleJump.Hierarchy
 {
-	internal class PlayScreen : Screen
+	internal class PlayScreen : BaseScreen
 	{
 		//Constants
 		private const float MUSIC_VOLUME = 0.2f;
@@ -41,6 +41,7 @@ namespace DoodleJump.Hierarchy
 		private const float MULTIPLIER_PER_STREAK = .06f;
 
 		public List<Platform> Platforms { get; private set; }
+		public List<PlatformBomb> Bombs { get; private set; }
 		public List<GameObject> GameObjects { get; private set; }
 		private Player Player { get; set; }
 
@@ -53,6 +54,7 @@ namespace DoodleJump.Hierarchy
 		private TextPopupManager PopupManager = new TextPopupManager();
 		private List<HighScore> highScores;
 		private bool started = false;
+		private Platform groundPlatform;
 
 
 		public override void Initialize()
@@ -61,6 +63,7 @@ namespace DoodleJump.Hierarchy
 			this.Camera = new Camera();
 			this.GameObjects = new List<GameObject>();
 			this.Platforms = new List<Platform>();
+			this.Bombs = new List<PlatformBomb>();
 			highScores = GameSettings.SaveSystem.LoadHighScores();
 
 			SpawnBackgroundLayers();
@@ -77,12 +80,12 @@ namespace DoodleJump.Hierarchy
 			this.GameObjects.Add(Player);
 			GameSettings.TimeScale = 1f;
 
-			Platform initialPlatform = new Platform(new SpriteSheet(GameSettings.Assets.Textures["platform"])) { };
-			initialPlatform.Position = new Vector2(0, initialPlatform.Visualization.Size.Y / 2);
-			initialPlatform.Visualization.Size = new Point(GameSettings.GameWidth, initialPlatform.Visualization.Size.Y);
-			initialPlatform.IsVisible = false;
-			Platforms.Add(initialPlatform);
-			GameObjects.Add(initialPlatform);
+			groundPlatform = new Platform(new SpriteSheet(GameSettings.Assets.Textures["platform"])) { };
+			groundPlatform.Position = new Vector2(0, groundPlatform.Visualization.Size.Y / 2);
+			groundPlatform.Visualization.Size = new Point(GameSettings.GameWidth, groundPlatform.Visualization.Size.Y);
+			groundPlatform.IsVisible = false;
+			Platforms.Add(groundPlatform);
+			GameObjects.Add(groundPlatform);
 			platformSpawner.Initialize(new Vector2(0, -220), GameSettings.Assets.Textures["platform"].Width / 2 * GameSettings.PIXEL_SCALE);
 
 
@@ -156,7 +159,48 @@ namespace DoodleJump.Hierarchy
 			}
 
 
-			Player.CheckPlatformCollisions(Platforms, dt);
+			//This will only return a platform on bounce (downwards movement), not on any other collision
+			Platform currentPlayerPlatform = Player.CheckPlatformToBounce(Platforms, dt);
+
+			/*
+			 * Spawn bombs on platforms
+			 * - The logic is not executed if the player is in the "walking" state (start of game) so that bombs are not spawned every frame
+			 */
+			if (currentPlayerPlatform != null && !Player.walking)
+			{
+				SpriteSheet spriteSheet = new SpriteSheet(GameSettings.Assets.Textures["bomb"]);
+				spriteSheet.Scale = 1;
+				PlatformBomb bomb = new PlatformBomb(currentPlayerPlatform.Position - new Vector2(0, currentPlayerPlatform.Size.Y / 2 + spriteSheet.Size.Y / 2), spriteSheet);
+				bomb.Velocity = new Vector2 (0, -1.5f);
+				Bombs.Add(bomb);
+				GameObjects.Add(bomb);
+				GameSettings.BounceCount++;
+				GameSettings.BombCount++;
+			}
+
+			//Every bomb checks for platform collisions
+			foreach (var bomb in Bombs.ToList())
+			{
+				Platform bombPlatform = bomb.CheckPlatformCollisions(Platforms);
+				//Remove platform if found
+				if (bombPlatform != null)
+				{
+					bombPlatform.IsActive = false;
+					Platforms.Remove(bombPlatform);
+					GameObjects.Remove(bombPlatform);
+				}
+				/*
+				 * Remove bomb if off screen
+				 * - Note: I am using a camera that is moving up instead of moving all platforms down, so the "off screen" check is performed using the camera class.
+				*/
+				if (!Camera.CanSeePoint(bomb.Position))
+				{
+					bomb.IsActive = false;
+					Bombs.Remove(bomb);
+					GameSettings.BombCount--;
+				}
+			}
+
 			foreach (var obj in GameObjects)
 			{
 				if (obj.IsActive)
@@ -178,6 +222,13 @@ namespace DoodleJump.Hierarchy
 			float addedScore = (GameSettings.MaxHeightReached - lastMaxHeight) * SCORE_FROM_HEIGHT * ScoreMultiplier;
 			GameSettings.ScoreDecimal += addedScore;
 			lastMaxHeight = GameSettings.MaxHeightReached;
+
+			if(Player.willDie)
+			{
+				GameSettings.EndScreen.Initialize();
+			}
+
+			base.Update(dt);
 		}
 
 		public override void Draw(SpriteBatch spriteBatch, PolygonDrawer polygonDrawer)
@@ -213,6 +264,8 @@ namespace DoodleJump.Hierarchy
 			spriteBatch.Begin(samplerState: SamplerState.LinearClamp);
 			DrawUI(spriteBatch);
 			spriteBatch.End();
+
+			base.Draw(spriteBatch, polygonDrawer);
 		}
 
 		private void DrawObjects(SpriteBatch spriteBatch, PolygonDrawer polygonDrawer)

@@ -16,7 +16,7 @@ using static System.Formats.Asn1.AsnWriter;
 
 namespace DoodleJump.Hierarchy
 {
-	internal class EndScreen : Screen
+	internal class EndScreen : BaseScreen
 	{
 		//UI
 		const int TEXT_SPACING = 50;
@@ -101,6 +101,8 @@ namespace DoodleJump.Hierarchy
 			{
 				Game1.Instance.Exit();
 			}
+
+			base.Update(dt);
 		}
 
 		public override void Draw(SpriteBatch spriteBatch, PolygonDrawer polygonDrawer)
@@ -173,6 +175,7 @@ namespace DoodleJump.Hierarchy
 			spriteBatch.End();
 			polygonDrawer.End();
 
+			base.Draw(spriteBatch, polygonDrawer);
 
 		}
 
