@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace DoodleJump.Core
 {
-	public class Assets
+	internal class Assets
 	{
 		public Dictionary<string, Texture2D> Textures { get; private set; } = [];
 		public Dictionary<string, SpriteFont> Fonts { get; private set; } = [];

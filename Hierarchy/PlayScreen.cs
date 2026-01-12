@@ -17,7 +17,7 @@ using static System.Formats.Asn1.AsnWriter;
 
 namespace DoodleJump.Hierarchy
 {
-	public class PlayScreen : Screen
+	internal class PlayScreen : Screen
 	{
 		//Constants
 		private const int CAMERA_MOVE_SPEED_UP = 200;

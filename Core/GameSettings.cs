@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace DoodleJump.Core
 {
-	public static partial class GameSettings
+	internal static partial class GameSettings
 	{
 		public const int PIXEL_SCALE = 4;
 		public const int HEIGHT_PER_METER = 100;

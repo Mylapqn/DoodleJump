@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace DoodleJump.Hierarchy
 {
-	public abstract class Screen
+	internal abstract class Screen
 	{
 		protected Screen() { }
 

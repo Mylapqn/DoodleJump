@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace DoodleJump.Objects
 {
-	public class Player : GameObject
+	internal class Player : GameObject
 	{
 		//Animation & visuals
 		private const float ANIMATION_FPS = 8f;

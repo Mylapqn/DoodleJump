@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace DoodleJump.Core
 {
 
-	public static class Input
+	internal static class Input
 	{
 		public enum MouseButton
 		{

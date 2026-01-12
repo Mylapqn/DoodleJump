@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace DoodleJump.Core
 {
-	public class SaveSystem
+	internal class SaveSystem
 	{
 		public string SaveFilePath { get; private set; }
 		const char CSV_SPERATAOR = ';';

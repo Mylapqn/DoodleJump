@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DoodleJump.Core
 {
-	public class HighScore
+	internal class HighScore
 	{
 		public string PlayerName { get; set; }
 		public int Score { get; set; }

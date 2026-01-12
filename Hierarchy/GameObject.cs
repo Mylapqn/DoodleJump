@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 namespace DoodleJump.Hierarchy
 {
 
-	public abstract class GameObject
+	internal abstract class GameObject
 	{
 		public SpriteSheet Visualization { get; set; }
 

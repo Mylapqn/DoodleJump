@@ -25,7 +25,7 @@ namespace DoodleJump.Core
 			Content.RootDirectory = "Content";
 			IsMouseVisible = true;
 
-			
+
 
 			Instance = this;
 		}

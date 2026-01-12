@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace DoodleJump.Rendering
 {
-	public class Camera
+	internal class Camera
 	{
 		public Vector2 Position { get; set; } = Vector2.Zero;
 		public float Zoom { get; set; } = 1.0f;

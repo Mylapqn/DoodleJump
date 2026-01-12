@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace DoodleJump.Rendering
 {
-	public class SpriteSheetAnimation : SpriteSheet
+	internal class SpriteSheetAnimation : SpriteSheet
 	{
 		public int MinSpriteIndex { get; set; }
 		public int MaxSpriteIndex { get; set; }

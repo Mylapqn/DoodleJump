@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace DoodleJump.Rendering
 {
-	public class BackgroundLayer : GameObject
+	internal class BackgroundLayer : GameObject
 	{
 		public float depth = 0;
 		Vector2 initialPosition;

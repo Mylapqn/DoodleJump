@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace DoodleJump.Rendering
 {
-	public class LineTrail
+	internal class LineTrail
 	{
 		public struct TrailPoint
 		{

@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace DoodleJump.Objects
 {
-	public class Platform : GameObject
+	internal class Platform : GameObject
 	{
 		public const float JUMP_OFFSET_DURATION = 0.5f;
 		private const int OFFSET_INTENSITY_MULTIPLIER = 30;

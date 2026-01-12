@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace DoodleJump.Objects
 {
-	public class TextPopup
+	internal class TextPopup
 	{
 		public Vector2 Position { get; set; }
 		public string Text { get; set; }

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace DoodleJump.Rendering
 {
-	public class ColorUtilities
+	internal class ColorUtilities
 	{
 		public static Color ColorFromHex(uint rrggbbaa)
 		{

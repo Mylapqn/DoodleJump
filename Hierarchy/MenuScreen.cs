@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace DoodleJump.Hierarchy
 {
-	public class MenuScreen : Screen
+	internal class MenuScreen : Screen
 	{
 		private float totalTime = 0f;
 		private SpriteSheetAnimation cat;

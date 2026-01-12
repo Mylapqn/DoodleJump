@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace DoodleJump.Hierarchy
 {
-	public class PlatformSpawner
+	internal class PlatformSpawner
 	{
 		//Constants
 

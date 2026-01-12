@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace DoodleJump.Rendering
 {
-	public class SpriteSheet
+	internal class SpriteSheet
 	{
 		public Texture2D Texture { get; }
 

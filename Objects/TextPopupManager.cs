@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace DoodleJump.Objects
 {
-	public class TextPopupManager
+	internal class TextPopupManager
 	{
 		private List<TextPopup> activePopups = new List<TextPopup>();
 		public TextPopupManager() { }

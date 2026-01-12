@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace DoodleJump.Rendering
 {
-	public class PolygonDrawer
+	internal class PolygonDrawer
 	{
 		public List<VertexPositionColor[]> triangleListCache = [];
 		public List<VertexPositionColor[]> triangleStripCache = [];

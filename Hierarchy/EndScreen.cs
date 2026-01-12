@@ -16,7 +16,7 @@ using static System.Formats.Asn1.AsnWriter;
 
 namespace DoodleJump.Hierarchy
 {
-	public class EndScreen : Screen
+	internal class EndScreen : Screen
 	{
 		//UI
 		const int TEXT_SPACING = 50;
