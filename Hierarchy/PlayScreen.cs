@@ -20,13 +20,14 @@ namespace DoodleJump.Hierarchy
 	internal class PlayScreen : Screen
 	{
 		//Constants
-		private const int CAMERA_MOVE_SPEED_UP = 200;
 		private const float MUSIC_VOLUME = 0.2f;
 		private const float TIME_SCALE = 1f;
 		private const float MAX_TIME_SCALE_HEIGHT = 100000f;
 		private const float MAX_TIME_SCALE = 3f;
 		private const float SCORE_FROM_HEIGHT = 0.01f;
 		private const float CAMERA_ZOOM = 1f;
+		private const float CAMERA_LEAD_SCREEN_RATIO = 0.4f;
+		private const int CAMERA_MOVE_SPEED = 150;
 
 		//UI
 		private const float TEXT_SCALE_SMALL = 0.3f;
@@ -123,7 +124,15 @@ namespace DoodleJump.Hierarchy
 			if (started)
 			{
 				GameSettings.ElapsedGameTime += dt;
-				Camera.Position += new Vector2(0, -CAMERA_MOVE_SPEED_UP * dt);
+				Camera.Position += new Vector2(0, -CAMERA_MOVE_SPEED * dt);
+				float targetCameraY = Player.Position.Y + GameSettings.WindowHeight * (0.5f - CAMERA_LEAD_SCREEN_RATIO);
+				if (Camera.Position.Y > targetCameraY)
+				{
+					Camera.Position =
+						new Vector2(
+							GameSettings.PlayScreen.Camera.Position.X,
+							targetCameraY);
+				}
 			}
 			else if (!Player.walking)
 			{
